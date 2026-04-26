@@ -1,6 +1,6 @@
-# CryptoViz — Enterprise Encryption Visualizer
+# CryptoViz — Encryption Visualizer
 
-An enterprise-grade cryptographic visualization platform.
+A cryptographic visualization platform.
 **C++ core engine** ↔ **pybind11** ↔ **Python FastAPI** ↔ **HTML/CSS/JS SPA**
 
 ---
