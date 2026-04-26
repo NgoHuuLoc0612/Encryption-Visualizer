@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CryptoViz — Encryption Visualizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#09090f;--surface:#10101c;--panel:#141425;--border:#1e1e38;--border2:#2a2a4a;--accent:#00e5ff;--accent2:#7c3aed;--accent3:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--text2:#94a3b8;--text3:#475569;--mono:'JetBrains Mono',monospace;--sans:'Syne',sans-serif;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,229,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;}
+#app{position:relative;z-index:1;display:flex;flex-direction:column;min-height:100vh;}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:rgba(10,10,20,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--sans);font-weight:800;font-size:1.05rem;letter-spacing:.04em;}
+.logo-icon{width:26px;height:26px;}
+.logo .a{color:var(--accent);}
+.status-badge{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.68rem;color:var(--text2);padding:4px 10px;background:var(--surface);border:1px solid var(--border);border-radius:20px;}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--text3);transition:background .4s;}
+.sdot.on{background:var(--accent3);box-shadow:0 0 6px var(--accent3);animation:pdot 2s infinite;}
+@keyframes pdot{0%,100%{opacity:1}50%{opacity:.4}}
+nav.tabs{display:flex;gap:0;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+nav.tabs::-webkit-scrollbar{display:none;}
+.tab-btn{padding:10px 16px;font-family:var(--sans);font-size:.78rem;font-weight:700;letter-spacing:.05em;color:var(--text3);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .2s;}
+.tab-btn:hover{color:var(--text2);}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+main{display:flex;flex:1;overflow:hidden;}
+aside{width:240px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:16px 12px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;}
+.content{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.018);}
+.pt{font-family:var(--mono);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);}
+.pb{padding:14px;}
+.fg{display:flex;flex-direction:column;gap:5px;}
+label{font-family:var(--mono);font-size:.67rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;}
+input,select,textarea{background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:var(--mono);font-size:.78rem;padding:7px 11px;outline:none;transition:border-color .2s,box-shadow .2s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,229,255,.1);}
+textarea{resize:vertical;min-height:70px;}
+.btn{padding:8px 16px;border-radius:7px;border:none;cursor:pointer;font-family:var(--sans);font-weight:700;font-size:.78rem;letter-spacing:.04em;transition:all .2s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
+.bp{background:linear-gradient(135deg,var(--accent) 0%,#0088ff 100%);color:#000;box-shadow:0 0 16px rgba(0,229,255,.25);}
+.bp:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,229,255,.35);}
+.bs{background:var(--border2);color:var(--text);}
+.bs:hover{background:var(--border);}
+.ba2{background:linear-gradient(135deg,var(--accent2),#a855f7);color:#fff;}
+.bsm{padding:4px 10px;font-size:.7rem;}
+.brow{display:flex;gap:7px;flex-wrap:wrap;}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:3px;font-family:var(--mono);font-size:.6rem;font-weight:700;text-transform:uppercase;background:var(--border2);color:var(--text2);}
+.bc{background:rgba(0,229,255,.12);color:var(--accent);}
+.bp2{background:rgba(124,58,237,.18);color:#c4b5fd;}
+.bg{background:rgba(16,185,129,.12);color:var(--accent3);}
+.flex-r{display:flex;gap:12px;}
+.flex-c{display:flex;flex-direction:column;gap:12px;}
+.grow{flex:1;min-width:0;}
+.sep{height:1px;background:var(--border);margin:4px 0;}
+.code{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-family:var(--mono);font-size:.72rem;line-height:1.7;color:var(--text2);overflow-x:auto;white-space:pre-wrap;word-break:break-all;}
+.code .kw{color:var(--accent);}
+.code .val{color:var(--accent3);}
+.code .cmt{color:var(--text3);}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--surface);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+.fade-in{animation:fi .35s ease forwards;}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.view{display:none;}
+.view.visible{display:flex;flex-direction:column;gap:14px;}
+
+/* AES matrix */
+.aes-state{display:inline-grid;grid-template-columns:repeat(4,1fr);gap:3px;}
+.aes-cell{width:50px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:5px;font-family:var(--mono);font-size:.8rem;font-weight:600;background:var(--surface);border:1px solid var(--border2);transition:all .38s cubic-bezier(.34,1.56,.64,1);}
+.aes-cell.sub{background:rgba(124,58,237,.18);border-color:var(--accent2);color:#c4b5fd;}
+.aes-cell.shr{background:rgba(245,158,11,.13);border-color:var(--warn);color:#fcd34d;}
+.aes-cell.mix{background:rgba(16,185,129,.13);border-color:var(--accent3);color:#6ee7b7;}
+.aes-cell.ark{background:rgba(239,68,68,.13);border-color:var(--danger);color:#fca5a5;}
+
+/* S-Box */
+.sbox-grid{display:grid;grid-template-columns:repeat(16,1fr);gap:1px;font-family:var(--mono);font-size:.52rem;}
+.sbox-cell{padding:2px;text-align:center;border-radius:2px;background:var(--surface);transition:all .15s;cursor:default;}
+.sbox-cell:hover{background:rgba(0,229,255,.14);color:var(--accent);}
+.sbox-cell.hl{background:rgba(0,229,255,.22);color:var(--accent);border:1px solid rgba(0,229,255,.4);}
+
+/* Round list */
+.round-list{display:flex;flex-direction:column;gap:2px;max-height:380px;overflow-y:auto;}
+.round-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:5px;cursor:pointer;border:1px solid transparent;font-family:var(--mono);font-size:.7rem;color:var(--text2);transition:all .18s;}
+.round-item:hover{background:rgba(255,255,255,.025);border-color:var(--border);}
+.round-item.active{background:rgba(0,229,255,.06);border-color:var(--accent);color:var(--accent);}
+.rbadge{width:26px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;background:var(--border);font-weight:700;font-size:.62rem;flex-shrink:0;}
+
+/* ChaCha */
+.cc-matrix{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;}
+.cc-cell{padding:5px 3px;text-align:center;border-radius:5px;font-family:var(--mono);font-size:.64rem;background:var(--surface);border:1px solid var(--border2);transition:all .32s cubic-bezier(.34,1.56,.64,1);}
+.cc-cell.col-a{background:rgba(0,229,255,.14);border-color:var(--accent);color:var(--accent);}
+.cc-cell.diag-a{background:rgba(124,58,237,.14);border-color:var(--accent2);color:#c4b5fd;}
+.cc-cell.ct{color:var(--warn);}
+.cc-cell.kw{color:var(--accent3);}
+.cc-cell.ctr{color:var(--danger);}
+.cc-cell.nc{color:#f0abfc;}
+
+/* SHA */
+.sha-vars{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;}
+.sha-var{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.sha-vl{font-family:var(--mono);font-size:.62rem;color:var(--text3);}
+.sha-vv{font-family:var(--mono);font-size:.65rem;padding:3px 6px;background:var(--surface);border:1px solid var(--border2);border-radius:4px;word-break:break-all;text-align:center;}
+.sha-prog{height:4px;border-radius:2px;background:var(--border);overflow:hidden;width:100%;}
+.sha-prog-f{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:2px;transition:width .3s;}
+
+/* Bit visualizer */
+.bit-row{display:flex;gap:2px;flex-wrap:wrap;}
+.bit{width:9px;height:18px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.48rem;font-weight:700;transition:all .22s;}
+.bit.one{background:rgba(0,229,255,.22);color:var(--accent);border:1px solid rgba(0,229,255,.3);}
+.bit.zero{background:var(--surface);color:var(--text3);border:1px solid var(--border);}
+.bit.xr{background:rgba(124,58,237,.22);color:#c4b5fd;border:1px solid rgba(124,58,237,.3);}
+
+/* DH */
+.dh-wrap{display:flex;align-items:center;gap:0;width:100%;}
+.dh-party{width:100px;display:flex;flex-direction:column;align-items:center;gap:7px;flex-shrink:0;}
+.dh-icon{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;border:2px solid;}
+.dh-alice{border-color:var(--accent);background:rgba(0,229,255,.07);}
+.dh-bob{border-color:var(--accent2);background:rgba(124,58,237,.07);}
+.dh-eve{border-color:var(--danger);background:rgba(239,68,68,.07);}
+.dh-chan{flex:1;padding:0 10px;display:flex;flex-direction:column;gap:7px;}
+
+/* Entropy */
+.ent-track{height:7px;border-radius:4px;background:var(--border);overflow:hidden;}
+.ent-fill{height:100%;border-radius:4px;transition:width .5s cubic-bezier(.34,1.56,.64,1);background:linear-gradient(90deg,var(--danger) 0%,var(--warn) 35%,var(--accent3) 65%,var(--accent) 100%);}
+
+/* Freq chart */
+.freq-chart{display:flex;align-items:flex-end;gap:2px;height:72px;}
+.freq-bw{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;}
+.freq-b{width:100%;border-radius:2px 2px 0 0;min-height:2px;background:var(--accent2);transition:height .38s cubic-bezier(.34,1.56,.64,1);}
+.freq-b.en{background:var(--border2);opacity:.6;}
+.freq-bl{font-family:var(--mono);font-size:.48rem;color:var(--text3);}
+
+/* Vigenere */
+.vig-table{display:flex;flex-direction:column;gap:2px;font-family:var(--mono);font-size:.65rem;}
+.vig-row{display:flex;gap:2px;}
+.vc{width:24px;height:20px;display:flex;align-items:center;justify-content:center;border-radius:3px;background:var(--surface);border:1px solid transparent;transition:all .25s;}
+.vc.vh{background:var(--border);color:var(--text2);font-weight:700;}
+.vc.vhl{background:rgba(0,229,255,.18);border-color:var(--accent);color:var(--accent);}
+.vc.vk{background:rgba(16,185,129,.1);color:var(--accent3);}
+
+/* RSA */
+.rsa-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;}
+.rsa-p{padding:8px 11px;background:var(--surface);border:1px solid var(--border);border-radius:6px;}
+.rsa-pl{font-family:var(--mono);font-size:.6rem;color:var(--text3);text-transform:uppercase;}
+.rsa-pv{font-family:var(--mono);font-size:.78rem;color:var(--accent);margin-top:3px;word-break:break-all;}
+
+/* Challenge */
+.ch-card{padding:14px;border-radius:10px;border:1px solid var(--border2);background:linear-gradient(135deg,rgba(124,58,237,.05),rgba(0,229,255,.03));display:flex;flex-direction:column;gap:9px;}
+.diff-easy{background:rgba(16,185,129,.18);color:var(--accent3);}
+.diff-medium{background:rgba(245,158,11,.18);color:var(--warn);}
+.diff-hard{background:rgba(239,68,68,.18);color:var(--danger);}
+.ch-hint{font-family:var(--mono);font-size:.7rem;color:var(--text3);padding:7px 11px;background:var(--surface);border-left:3px solid var(--border2);border-radius:0 4px 4px 0;}
+.ch-hint.rev{border-left-color:var(--warn);color:var(--warn);}
+.score-d{display:flex;align-items:center;gap:10px;font-family:var(--mono);padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px;}
+.score-v{font-size:1.3rem;font-weight:700;color:var(--warn);}
+.score-l{font-size:.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;}
+
+/* Byte compare */
+.byrow{display:flex;gap:2px;}
+.bybox{width:21px;height:21px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.58rem;background:var(--surface);border:1px solid var(--border2);transition:all .25s;}
+.bybox.diff{background:rgba(239,68,68,.18);border-color:var(--danger);color:var(--danger);}
+.bybox.same{background:rgba(16,185,129,.09);border-color:rgba(16,185,129,.3);color:var(--accent3);}
+
+/* Toast */
+#tc{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:7px;}
+.toast{padding:9px 14px;border-radius:7px;backdrop-filter:blur(12px);font-family:var(--mono);font-size:.72rem;min-width:200px;max-width:360px;border:1px solid;animation:ti .28s ease;display:flex;align-items:center;gap:7px;}
+.toast.success{background:rgba(16,185,129,.13);border-color:var(--accent3);color:var(--accent3);}
+.toast.error{background:rgba(239,68,68,.13);border-color:var(--danger);color:var(--danger);}
+.toast.info{background:rgba(0,229,255,.09);border-color:var(--accent);color:var(--accent);}
+@keyframes ti{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+
+.sl{font-family:var(--mono);font-size:.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;padding:0 4px;margin-bottom:2px;}
+.sb-btn{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:5px;background:none;border:1px solid transparent;cursor:pointer;color:var(--text2);font-family:var(--sans);font-size:.78rem;font-weight:700;transition:all .18s;text-align:left;width:100%;}
+.sb-btn:hover{background:var(--border);border-color:var(--border2);color:var(--text);}
+.sb-btn.active{background:rgba(0,229,255,.07);border-color:rgba(0,229,255,.18);color:var(--accent);}
+.hx-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;font-family:var(--mono);font-size:.7rem;}
+.hx-cell{padding:5px;border-radius:4px;text-align:center;background:var(--surface);border:1px solid var(--border);color:var(--text2);}
+.hx-cell.hk{background:rgba(16,185,129,.09);border-color:var(--accent3);color:#6ee7b7;}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <div class="logo">
+    <svg class="logo-icon" viewBox="0 0 26 26" fill="none">
+      <rect x="2" y="2" width="22" height="22" rx="4" stroke="#00e5ff" stroke-width="1.4"/>
+      <path d="M7 13h2.5M16.5 13H19M10 9l2 4-2 4M16 9l-2 4 2 4" stroke="#00e5ff" stroke-width="1.4" stroke-linecap="round"/>
+      <circle cx="13" cy="13" r="1.8" fill="#7c3aed"/>
+    </svg>
+    CRYPTO<span class="a">VIZ</span>
+    <span class="badge bp2">v2.0</span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span class="badge" id="eng-badge">ENGINE:—</span>
+    <div class="status-badge"><div class="sdot" id="sdot"></div><span id="stxt">connecting…</span></div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-v="aes">⊞ AES</button>
+  <button class="tab-btn" data-v="chacha">↺ ChaCha20</button>
+  <button class="tab-btn" data-v="sha"># SHA-256</button>
+  <button class="tab-btn" data-v="rsa">🔑 RSA</button>
+  <button class="tab-btn" data-v="dh">⇄ DH</button>
+  <button class="tab-btn" data-v="xor">⊕ XOR</button>
+  <button class="tab-btn" data-v="vig">Vig</button>
+  <button class="tab-btn" data-v="ana">📊 Analysis</button>
+  <button class="tab-btn" data-v="ch">🏆 Challenges</button>
+  <button class="tab-btn" data-v="sha3">⬡ SHA-3</button>
+  <button class="tab-btn" data-v="hmac">⛓ HMAC/KDF</button>
+  <button class="tab-btn" data-v="diff">⊗ Differential</button>
+  <button class="tab-btn" data-v="power">⚡ Power/CPA</button>
+  <button class="tab-btn" data-v="nist">📐 NIST Tests</button>
+</nav>
+
+<main>
+<aside>
+  <div class="sl">Config</div>
+  <div class="fg">
+    <label>Key Size</label>
+    <select id="g-ks"><option value="128">AES-128</option><option value="192">AES-192</option><option value="256" selected>AES-256</option></select>
+  </div>
+  <div class="fg">
+    <label>Anim Speed</label>
+    <input type="range" id="spd" min="50" max="1200" value="350" style="padding:0;height:4px;cursor:pointer;">
+  </div>
+  <div class="sep"></div>
+  <div class="sl">Actions</div>
+  <button class="sb-btn" onclick="randomizeAll()"><span>⚡</span> Randomize Inputs</button>
+  <button class="sb-btn" onclick="clearAll()"><span>✕</span> Clear All</button>
+  <div class="sep"></div>
+  <div class="sl">Score</div>
+  <div class="score-d">
+    <div><div class="score-v" id="tot-score">0</div><div class="score-l">points</div></div>
+    <div><div style="font-family:var(--mono);font-size:.62rem;color:var(--text3)">Solved</div><div style="font-family:var(--mono);font-size:.78rem;color:var(--text2)" id="ch-solved">0/0</div></div>
+  </div>
+</aside>
+
+<div class="content">
+
+<!-- ══ AES ════════════════════════════════════════════════════ -->
+<div class="view visible" id="view-aes">
+  <div class="flex-r" style="flex-wrap:wrap;">
+    <div class="panel grow">
+      <div class="ph"><span class="pt">AES Configuration</span><span class="badge bc">FIPS 197</span></div>
+      <div class="pb flex-c">
+        <div class="fg"><label>Plaintext hex (16 bytes)</label><input id="aes-pt" value="00112233445566778899aabbccddeeff"/></div>
+        <div class="fg"><label>Key hex (16/24/32 bytes)</label><input id="aes-key" value="000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"/></div>
+        <div class="brow">
+          <button class="btn bp" onclick="runAES()">▶ Encrypt</button>
+          <button class="btn bs" onclick="runAESStream()">⚡ Stream</button>
+          <button class="btn bs" onclick="runAvalanche()">🌊 Avalanche</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel" style="min-width:260px;">
+      <div class="ph"><span class="pt">S-Box</span><span id="sbox-tip" class="badge" style="display:none"></span></div>
+      <div class="pb"><div class="sbox-grid" id="sbox-grid"></div></div>
+    </div>
+  </div>
+
+  <div class="flex-r" style="flex-wrap:wrap;">
+    <div class="panel" style="min-width:180px;">
+      <div class="ph"><span class="pt">Rounds</span></div>
+      <div class="pb"><div class="round-list" id="aes-rlist"></div></div>
+    </div>
+    <div class="panel grow">
+      <div class="ph">
+        <span class="pt" id="aes-step-title">State</span>
+        <div style="display:flex;gap:5px;">
+          <button class="btn bs bsm" onclick="aesP()">◀</button>
+          <button class="btn bs bsm" onclick="aesN()">▶</button>
+          <button class="btn bp bsm" onclick="aesPlay()" id="aes-pb">▶ Play</button>
+        </div>
+      </div>
+      <div class="pb flex-c">
+        <div class="flex-r" style="gap:14px;flex-wrap:wrap;align-items:flex-start;">
+          <div class="flex-c" style="gap:3px;"><div style="font-family:var(--mono);font-size:.6rem;color:var(--text3);">BEFORE</div><div class="aes-state" id="aes-mb"></div></div>
+          <div style="display:flex;align-items:center;font-size:1.1rem;color:var(--text3);padding-top:20px;">→</div>
+          <div class="flex-c" style="gap:3px;"><div style="font-family:var(--mono);font-size:.6rem;color:var(--text3);" id="aes-al">AFTER OP</div><div class="aes-state" id="aes-ma"></div></div>
+          <div class="flex-c grow" style="gap:7px;min-width:180px;">
+            <div class="fg"><label>Operation</label><div class="code" id="aes-op" style="min-height:55px;font-size:.7rem;"></div></div>
+            <div class="fg"><label>Subkey</label><div class="hx-grid" id="aes-sk"></div></div>
+          </div>
+        </div>
+        <div><div style="font-family:var(--mono);font-size:.6rem;color:var(--text3);margin-bottom:5px;">KEY SCHEDULE</div><div id="aes-ks" style="display:flex;flex-wrap:wrap;gap:4px;"></div></div>
+        <div><label>Ciphertext</label><div class="code" id="aes-ct" style="color:var(--accent);font-size:.82rem;font-weight:700;"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="av-panel" style="display:none;">
+    <div class="ph"><span class="pt">Avalanche Effect</span><span class="badge bc" id="av-pct"></span></div>
+    <div class="pb flex-c">
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.68rem;color:var(--text2);"><span>Bits Changed</span><span id="av-bits">—</span></div>
+        <div class="ent-track"><div class="ent-fill" id="av-bar" style="width:0%"></div></div>
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.6rem;color:var(--text3);"><span>0</span><span>ideal ~50% (64/128 bits)</span></div>
+      </div>
+      <div><div style="font-family:var(--mono);font-size:.6rem;color:var(--text3);margin-bottom:5px;">BYTE DIFF (red=changed)</div>
+        <div class="byrow" id="av-orig"></div>
+        <div class="byrow" id="av-mod" style="margin-top:3px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ChaCha20 ═══════════════════════════════════════════════ -->
+<div class="view" id="view-chacha">
+  <div class="flex-r" style="flex-wrap:wrap;">
+    <div class="panel grow">
+      <div class="ph"><span class="pt">ChaCha20 Config</span><span class="badge bp2">RFC 8439</span></div>
+      <div class="pb flex-c">
+        <div class="fg"><label>Plaintext (hex)</label><input id="cc-pt" value="4c616469657320616e642047656e746c656d656e206f662074686520636c617373"/></div>
+        <div class="fg"><label>Key (32 bytes hex)</label><input id="cc-key" value="000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"/></div>
+        <div class="flex-r">
+          <div class="fg grow"><label>Nonce (12 bytes hex)</label><input id="cc-nonce" value="000000000000004a00000000"/></div>
+          <div class="fg" style="width:80px;"><label>Counter</label><input id="cc-ctr" type="number" value="1" min="0"/></div>
+        </div>
+        <button class="btn bp" onclick="runChaCha()">▶ Encrypt &amp; Visualize</button>
+      </div>
+    </div>
+    <div class="panel" style="min-width:320px;">
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:7px;"><span class="pt">State Matrix</span><span class="badge" id="cc-rl">Round —</span><span class="badge" id="cc-tl">—</span></div>
+        <div style="display:flex;gap:5px;"><button class="btn bs bsm" onclick="ccP()">◀</button><button class="btn bs bsm" onclick="ccN()">▶</button><button class="btn bp bsm" onclick="ccPlay()" id="cc-pb">▶ Play</button></div>
+      </div>
+      <div class="pb flex-c">
+        <div class="cc-matrix" id="cc-mat"></div>
+        <div style="font-family:var(--mono);font-size:.67rem;color:var(--text3);" id="cc-qr"></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph"><span class="pt">Output</span></div>
+    <div class="pb flex-c">
+      <div class="fg"><label>Keystream (hex)</label><div class="code" id="cc-ks"></div></div>
+      <div class="fg"><label>Ciphertext (hex)</label><div class="code" id="cc-ct"></div></div>
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.68rem;color:var(--text2);"><span>Ciphertext Entropy</span><span id="cc-ev">—</span></div>
+        <div class="ent-track"><div class="ent-fill" id="cc-eb" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SHA-256 ════════════════════════════════════════════════ -->
+<div class="view" id="view-sha">
+  <div class="flex-r" style="flex-wrap:wrap;">
+    <div class="panel grow">
+      <div class="ph"><span class="pt">SHA-256 Config</span><span class="badge bc">FIPS 180-4</span></div>
+      <div class="pb flex-c">
+        <div class="fg"><label>Message (hex)</label><input id="sha-msg" value="61626364"/></div>
+        <div class="fg"><label>Or type UTF-8</label><input id="sha-utf8" placeholder="type text…" oninput="sha_u2h()"/></div>
+        <button class="btn bp" onclick="runSHA()">▶ Hash &amp; Visualize</button>
+      </div>
+    </div>
+    <div class="panel" style="min-width:260px;">
+      <div class="ph"><span class="pt">Hash Values H0–H7</span></div>
+      <div class="pb"><div class="sha-vars" id="sha-hv"></div></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph">
+      <span class="pt">Compression Function</span>
+      <div style="display:flex;gap:5px;align-items:center;">
+        <button class="btn bs bsm" onclick="shaP()">◀</button><button class="btn bs bsm" onclick="shaN()">▶</button>
+        <button class="btn bp bsm" onclick="shaPlay()" id="sha-pb">▶ Play</button>
+        <span class="badge" id="sha-rb">Round —</span>
+      </div>
+    </div>
+    <div class="pb flex-c">
+      <div class="sha-prog"><div class="sha-prog-f" id="sha-pf" style="width:0%"></div></div>
+      <div class="sha-vars" id="sha-wv"></div>
+      <div class="flex-r" style="gap:14px;flex-wrap:wrap;">
+        <div class="grow"><label>Step Detail</label><div class="code" id="sha-sd"></div></div>
+        <div style="min-width:180px;"><label>Msg Schedule W[i]</label><div id="sha-ws" style="display:flex;flex-wrap:wrap;gap:2px;max-height:90px;overflow-y:auto;"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph"><span class="pt">Padded Message &amp; Digest</span></div>
+    <div class="pb flex-c">
+      <div class="fg"><label>Padded</label><div class="code" id="sha-pad"></div></div>
+      <div class="fg"><label>SHA-256 Digest</label><div class="code" id="sha-dig" style="color:var(--accent);font-size:.85rem;font-weight:700;letter-spacing:.03em;"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RSA ═════════════════════════════════════════════════ -->
+<div class="view" id="view-rsa">
+  <div class="flex-r" style="flex-wrap:wrap;">
+    <div class="panel grow">
+      <div class="ph"><span class="pt">RSA Parameters</span><span class="badge bp2">PKCS#1</span></div>
+      <div class="pb flex-c">
+        <div class="flex-r">
+          <div class="fg grow"><label>Prime p</label><input id="rp" type="number" value="61"/></div>
+          <div class="fg grow"><label>Prime q</label><input id="rq" type="number" value="53"/></div>
+          <div class="fg grow"><label>Exponent e</label><input id="re" type="number" value="17"/></div>
+        </div>
+        <div class="fg"><label>Message (hex)</label><input id="rm" value="48656c6c6f"/></div>
+        <button class="btn bp" onclick="runRSA()">▶ Encrypt &amp; Trace</button>
+      </div>
+    </div>
+    <div class="panel" style="min-width:240px;">
+      <div class="ph"><span class="pt">Key Params</span></div>
+      <div class="pb">
+        <div class="rsa-grid">
+          <div class="rsa-p"><div class="rsa-pl">n=p·q</div><div class="rsa-pv" id="rn">—</div></div>
+          <div class="rsa-p"><div class="rsa-pl">φ(n)</div><div class="rsa-pv" id="rphi">—</div></div>
+          <div class="rsa-p"><div class="rsa-pl">e (pub)</div><div class="rsa-pv" id="re-v">—</div></div>
+          <div class="rsa-p"><div class="rsa-pl">d (priv)</div><div class="rsa-pv" id="rd">—</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph">
+      <span class="pt">Modular Exponentiation Trace</span>
+      <div style="display:flex;gap:5px;"><button class="btn bs bsm" onclick="rsaP()">◀</button><button class="btn bs bsm" onclick="rsaN()">▶</button><button class="btn bp bsm" onclick="rsaPlay()" id="rsa-pb">▶ Play</button></div>
+    </div>
+    <div class="pb flex-c">
+      <div id="rsa-ops" style="display:flex;flex-direction:column;gap:5px;max-height:160px;overflow-y:auto;"></div>
+      <div class="code" id="rsa-sd"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DH ══════════════════════════════════════════════════ -->
+<div class="view" id="view-dh">
+  <div class="panel">
+    <div class="ph"><span class="pt">Diffie-Hellman</span><span class="badge bg">RFC 3526</span></div>
+    <div class="pb flex-c">
+      <div class="flex-r">
+        <div class="fg grow"><label>Prime p</label><input id="dhp" type="number" value="23"/></div>
+        <div class="fg grow"><label>Generator g</label><input id="dhg" type="number" value="5"/></div>
+        <div class="fg grow"><label>Alice private a</label><input id="dha" type="number" value="6"/></div>
+        <div class="fg grow"><label>Bob private b</label><input id="dhb" type="number" value="15"/></div>
+      </div>
+      <div class="brow">
+        <button class="btn bp" onclick="runDH()">▶ Key Exchange</button>
+        <button class="btn bs" onclick="dhMITM()">⚠ MITM Sim</button>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph"><span class="pt">Exchange Diagram</span></div>
+    <div class="pb flex-c">
+      <div class="dh-wrap">
+        <div class="dh-party"><div class="dh-icon dh-alice">👤</div><div style="font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--accent);">Alice</div><div id="dh-ai" style="font-family:var(--mono);font-size:.6rem;color:var(--text3);text-align:center;"></div></div>
+        <div class="dh-chan" id="dh-chan"><div style="text-align:center;font-family:var(--mono);font-size:.65rem;color:var(--text3);">— pending —</div></div>
+        <div class="dh-party"><div class="dh-icon dh-bob">👤</div><div style="font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--accent2);">Bob</div><div id="dh-bi" style="font-family:var(--mono);font-size:.6rem;color:var(--text3);text-align:center;"></div></div>
+      </div>
+      <div id="dh-shared" style="display:none;"><label>Shared Secret</label><div class="code" id="dh-sv" style="color:var(--accent3);font-size:.88rem;font-weight:700;"></div></div>
+      <div id="dh-dlog" style="display:none;">
+        <label>Discrete Log Search g^x mod p</label>
+        <div id="dh-dg" style="display:flex;flex-wrap:wrap;gap:3px;font-family:var(--mono);font-size:.6rem;max-height:80px;overflow:hidden;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ XOR ═════════════════════════════════════════════════ -->
+<div class="view" id="view-xor">
+  <div class="panel">
+    <div class="ph"><span class="pt">XOR Cipher</span></div>
+    <div class="pb flex-c">
+      <div class="fg"><label>Plaintext (hex)</label><input id="xp" value="48656c6c6f20576f726c6421"/></div>
+      <div class="fg"><label>Key (hex, repeating)</label><input id="xk" value="ab"/></div>
+      <button class="btn bp" onclick="runXOR()">▶ Visualize XOR</button>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph"><span class="pt">Bitwise Visualization</span></div>
+    <div class="pb flex-c" id="xor-vis"></div>
+  </div>
+  <div class="panel">
+    <div class="ph"><span class="pt">Crib-Drag Attack</span></div>
+    <div class="pb flex-c">
+      <div class="flex-r">
+        <input id="xor-crib" placeholder="Known plaintext crib…" style="flex:1"/>
+        <button class="btn bs" onclick="cribDrag()">Drag Crib</button>
+      </div>
+      <div id="xor-cr" style="font-family:var(--mono);font-size:.7rem;color:var(--text2);"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Vigenere ═══════════════════════════════════════════════ -->
+<div class="view" id="view-vig">
+  <div class="flex-r" style="flex-wrap:wrap;">
+    <div class="panel grow">
+      <div class="ph"><span class="pt">Vigenère Cipher</span></div>
+      <div class="pb flex-c">
+        <div class="fg"><label>Plaintext</label><input id="vp" value="ATTACKATDAWN"/></div>
+        <div class="fg"><label>Key</label><input id="vk" value="LEMON"/></div>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-family:var(--mono);font-size:.7rem;color:var(--text2);">
+          <input type="checkbox" id="vd" style="width:auto"> Decrypt mode
+        </label>
+        <button class="btn bp" onclick="runVig()">▶ Encrypt / Decrypt</button>
+      </div>
+    </div>
+    <div class="panel" style="min-width:280px;">
+      <div class="ph"><span class="pt">Frequency Analysis</span></div>
+      <div class="pb flex-c">
+        <div class="freq-chart" id="vig-fc"></div>
+        <div style="font-family:var(--mono);font-size:.62rem;color:var(--text3);">■ ciphertext  ■ English</div>
+        <div id="vig-ioc" style="font-family:var(--mono);font-size:.68rem;color:var(--text2);"></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph"><span class="pt">Tableau &amp; Steps</span></div>
+    <div class="pb flex-c">
+      <div style="overflow-x:auto;"><div class="vig-table" id="vig-tab"></div></div>
+      <div style="display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto;" id="vig-steps"></div>
+      <div class="fg"><label>Result</label><div class="code" id="vig-res" style="color:var(--accent);font-size:.9rem;letter-spacing:.08em;"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Analysis ════════════════════════════════════════════════ -->
+<div class="view" id="view-ana">
+  <div class="flex-r" style="flex-wrap:wrap;">
+    <div class="panel grow">
+      <div class="ph"><span class="pt">Entropy Analysis</span></div>
+      <div class="pb flex-c">
+        <div class="fg"><label>Data (hex)</label><input id="ent-d" value="6b206574"/></div>
+        <button class="btn bp" onclick="runEnt()">Analyze</button>
+        <div id="ent-r" style="display:none;flex-direction:column;gap:7px;">
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.7rem;color:var(--text2);"><span>Shannon Entropy</span><span id="ent-v">—</span></div>
+          <div class="ent-track"><div class="ent-fill" id="ent-b" style="width:0%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.6rem;color:var(--text3);"><span>0 bits/byte</span><span>8 bits/byte (max)</span></div>
+          <div id="ent-dist" style="display:flex;gap:1px;flex-wrap:wrap;margin-top:5px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel grow">
+      <div class="ph"><span class="pt">Index of Coincidence</span></div>
+      <div class="pb flex-c">
+        <div class="fg"><label>Ciphertext</label><textarea id="ioc-ct" rows="3">LXFOPVEFRNHR</textarea></div>
+        <button class="btn bp" onclick="runIoC()">Estimate Key Length</button>
+        <div id="ioc-r" style="display:none;flex-direction:column;gap:7px;">
+          <div id="ioc-s" style="font-family:var(--mono);font-size:.7rem;color:var(--text2);"></div>
+          <div id="ioc-b" style="display:flex;align-items:flex-end;gap:3px;height:55px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph"><span class="pt">Frequency Analysis</span></div>
+    <div class="pb flex-c">
+      <div class="fg"><label>Text</label><textarea id="freq-t" rows="3">The quick brown fox jumps over the lazy dog</textarea></div>
+      <button class="btn bp" onclick="runFreq()">Analyze</button>
+      <div class="freq-chart" id="ana-fc"></div>
+      <div id="freq-chi" style="font-family:var(--mono);font-size:.7rem;color:var(--text2);margin-top:5px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Challenges ══════════════════════════════════════════════ -->
+<div class="view" id="view-ch">
+  <div class="flex-r" style="flex-wrap:wrap;">
+    <div class="panel grow">
+      <div class="ph"><span class="pt">Challenge Generator</span><span class="badge bp2">CTF Mode</span></div>
+      <div class="pb flex-c">
+        <div class="flex-r">
+          <div class="fg grow"><label>Algorithm</label><select id="ch-algo"><option value="AES">AES</option><option value="XOR">XOR</option><option value="SHA256">SHA-256</option><option value="DH">Diffie-Hellman</option></select></div>
+          <div class="fg grow"><label>Difficulty</label><select id="ch-diff"><option value="easy">Easy (100 pts)</option><option value="medium">Medium (250 pts)</option><option value="hard">Hard (500 pts)</option></select></div>
+        </div>
+        <button class="btn ba2" onclick="genChallenge()">⚡ Generate Challenge</button>
+      </div>
+    </div>
+    <div class="panel" style="min-width:180px;">
+      <div class="ph"><span class="pt">Scoreboard</span></div>
+      <div class="pb flex-c">
+        <div class="score-d" style="border:none;padding:0;background:none;">
+          <div><div class="score-v" id="ch-score">0</div><div class="score-l">Points</div></div>
+        </div>
+        <div id="ch-hist" style="display:flex;flex-direction:column;gap:3px;max-height:100px;overflow-y:auto;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel" id="ch-panel" style="display:none;">
+    <div class="ph">
+      <div style="display:flex;gap:7px;align-items:center;">
+        <span class="pt" id="ch-title">Challenge</span>
+        <span id="ch-db" class="badge"></span>
+        <span style="font-family:var(--mono);font-size:.68rem;color:var(--warn);">⭐ <span id="ch-pts"></span> pts</span>
+      </div>
+      <button class="btn bs bsm" onclick="showHint()">💡 Hint</button>
+    </div>
+    <div class="pb flex-c">
+      <div style="font-size:.84rem;line-height:1.6;" id="ch-q"></div>
+      <div class="ch-hint" id="ch-hint" style="display:none;"></div>
+      <div class="flex-c" style="gap:5px;">
+        <div class="fg"><label>Plaintext Given</label><div class="code" id="ch-gpt"></div></div>
+        <div class="fg"><label>Key Given</label><div class="code" id="ch-gk"></div></div>
+        <div class="fg"><label>Ciphertext Given</label><div class="code" id="ch-gct"></div></div>
+      </div>
+      <div class="flex-r">
+        <input id="ch-ans" placeholder="Your answer (hex)…" style="flex:1"/>
+        <button class="btn bp" onclick="submitAns()">Submit</button>
+      </div>
+      <div id="ch-fb" style="font-family:var(--mono);font-size:.73rem;display:none;"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ SHA-3 ═══════════════════════════════════════════════ -->
+<div class="view" id="view-sha3">
+  <div class="flex-r" style="flex-wrap:wrap;">
+    <div class="panel grow">
+      <div class="ph"><span class="pt">SHA-3 / Keccak Configuration</span><span class="badge bc">FIPS 202</span></div>
+      <div class="pb flex-c">
+        <div class="fg"><label>Message (hex)</label><input id="s3-msg" value="61626364"/></div>
+        <div class="fg"><label>or UTF-8</label><input id="s3-utf8" placeholder="type text…" oninput="s3u2h()"/></div>
+        <div class="fg"><label>Variant</label>
+          <select id="s3-var">
+            <option value="SHA3-256">SHA3-256 (rate=1088, cap=512)</option>
+            <option value="SHA3-512">SHA3-512 (rate=576, cap=1024)</option>
+            <option value="SHAKE128">SHAKE128 (rate=1344, cap=256)</option>
+            <option value="SHAKE256">SHAKE256 (rate=1088, cap=512)</option>
+          </select>
+        </div>
+        <button class="btn bp" onclick="runSHA3()">▶ Hash &amp; Visualize</button>
+      </div>
+    </div>
+    <div class="panel" style="min-width:280px;">
+      <div class="ph"><span class="pt">Sponge Parameters</span></div>
+      <div class="pb flex-c">
+        <div id="s3-params" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;font-family:var(--mono);font-size:.7rem;"></div>
+        <div class="fg"><label>Digest</label><div class="code" id="s3-dig" style="color:var(--accent);font-weight:700;font-size:.82rem;"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph">
+      <span class="pt">Keccak-f[1600] Permutation</span>
+      <div style="display:flex;gap:5px;">
+        <button class="btn bs bsm" onclick="s3P()">◀</button>
+        <button class="btn bs bsm" onclick="s3N()">▶</button>
+        <button class="btn bp bsm" onclick="s3Play()" id="s3-pb">▶ Play</button>
+        <span class="badge" id="s3-rb">Round —/24</span>
+      </div>
+    </div>
+    <div class="pb flex-c">
+      <div id="s3-state" style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;"></div>
+      <div class="flex-r" style="gap:12px;flex-wrap:wrap;">
+        <div class="grow"><label>Theta (column XOR)</label><div class="code" id="s3-theta" style="font-size:.68rem;"></div></div>
+        <div class="grow"><label>Iota constant</label><div class="code" id="s3-iota" style="font-size:.68rem;color:var(--warn);"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph"><span class="pt">Absorption / Squeezing States</span></div>
+    <div class="pb flex-c">
+      <div style="font-family:var(--mono);font-size:.7rem;color:var(--text2);">SHA-3 uses a <b>sponge construction</b>: absorb message blocks into rate portion, then squeeze output.</div>
+      <div id="s3-sponge" style="display:flex;flex-direction:column;gap:4px;max-height:120px;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HMAC / KDF ══════════════════════════════════════════════ -->
+<div class="view" id="view-hmac">
+  <div class="flex-r" style="flex-wrap:wrap;">
+    <div class="panel grow">
+      <div class="ph"><span class="pt">HMAC-SHA256</span><span class="badge bc">RFC 2104</span></div>
+      <div class="pb flex-c">
+        <div class="fg"><label>Key (hex)</label><input id="hm-key" value="0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"/></div>
+        <div class="fg"><label>Message (hex)</label><input id="hm-msg" value="4869205468657265"/></div>
+        <button class="btn bp" onclick="runHMAC()">▶ Compute HMAC</button>
+      </div>
+    </div>
+    <div class="panel" style="min-width:280px;">
+      <div class="ph"><span class="pt">HMAC Construction</span></div>
+      <div class="pb flex-c" id="hmac-vis">
+        <div style="font-family:var(--mono);font-size:.7rem;color:var(--text3);">HMAC(K,m) = H((K⊕opad) || H((K⊕ipad) || m))</div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph"><span class="pt">PBKDF2-HMAC-SHA256</span><span class="badge bp2">PKCS#5 v2.1</span></div>
+    <div class="pb flex-c">
+      <div class="flex-r" style="flex-wrap:wrap;">
+        <div class="fg grow"><label>Password (hex)</label><input id="pk-pw" value="70617373776f7264"/></div>
+        <div class="fg grow"><label>Salt (hex)</label><input id="pk-salt" value="73616c74"/></div>
+        <div class="fg" style="width:100px;"><label>Iterations</label><input id="pk-iter" type="number" value="10000" min="1" max="1000000"/></div>
+        <div class="fg" style="width:80px;"><label>DKLen</label><input id="pk-dklen" type="number" value="32" min="1" max="64"/></div>
+      </div>
+      <button class="btn bp" onclick="runPBKDF2()">▶ Derive Key</button>
+      <div class="flex-c" id="pbkdf2-vis" style="gap:6px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Differential / Linear ═════════════════════════════════ -->
+<div class="view" id="view-diff">
+  <div class="flex-r" style="flex-wrap:wrap;">
+    <div class="panel grow">
+      <div class="ph"><span class="pt">AES Differential Cryptanalysis</span><span class="badge bp2">Biham-Shamir 1991</span></div>
+      <div class="pb flex-c">
+        <div class="fg"><label>Plaintext P1 (hex, 16B)</label><input id="dc-p1" value="00000000000000000000000000000000"/></div>
+        <div class="fg"><label>Plaintext P2 (hex, 16B)</label><input id="dc-p2" value="01000000000000000000000000000000"/></div>
+        <div class="fg"><label>Key (hex)</label><input id="dc-key" value="000102030405060708090a0b0c0d0e0f"/></div>
+        <div class="fg"><label>Rounds to trace</label><input id="dc-rounds" type="number" value="4" min="1" max="14"/></div>
+        <button class="btn bp" onclick="runDiff()">▶ Trace Differential</button>
+      </div>
+    </div>
+    <div class="panel grow">
+      <div class="ph"><span class="pt">Linear Approximation</span><span class="badge bc">Matsui 1994</span></div>
+      <div class="pb flex-c">
+        <div class="fg"><label>Input Mask (hex, 16B)</label><input id="la-im" value="00000000000000000000000000000001"/></div>
+        <div class="fg"><label>Output Mask (hex, 16B)</label><input id="la-om" value="00000000000000000000000000000001"/></div>
+        <div class="fg"><label>Rounds</label><input id="la-r" type="number" value="3" min="1" max="10"/></div>
+        <button class="btn bp" onclick="runLinear()">▶ Compute Bias</button>
+      </div>
+    </div>
+  </div>
+  <div class="flex-r" style="flex-wrap:wrap;">
+    <div class="panel grow" id="diff-result" style="display:none;">
+      <div class="ph"><span class="pt">Differential Trail</span></div>
+      <div class="pb flex-c">
+        <div id="diff-vis" class="flex-c" style="gap:8px;"></div>
+      </div>
+    </div>
+    <div class="panel grow" id="lin-result" style="display:none;">
+      <div class="ph"><span class="pt">Linear Bias (Piling-Up Lemma)</span></div>
+      <div class="pb flex-c">
+        <div id="lin-vis" class="flex-c" style="gap:8px;"></div>
+        <div style="display:flex;align-items:flex-end;gap:3px;height:80px;" id="lin-chart"></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph"><span class="pt">Strict Avalanche Criterion (SAC)</span><span class="badge bc">Webster &amp; Tavares 1986</span></div>
+    <div class="pb flex-c">
+      <div class="flex-r">
+        <div class="fg grow"><label>Key (hex)</label><input id="sac-key" value="000102030405060708090a0b0c0d0e0f"/></div>
+        <div class="fg" style="width:100px;"><label>Samples</label><input id="sac-n" type="number" value="256" min="64" max="2000"/></div>
+        <button class="btn bp" onclick="runSAC()" style="align-self:flex-end;">▶ Compute SAC</button>
+      </div>
+      <div id="sac-result" style="display:none;" class="flex-c" style="gap:8px;">
+        <div class="flex-r" style="gap:12px;align-items:center;">
+          <div style="font-family:var(--mono);font-size:1.1rem;font-weight:700;" id="sac-score"></div>
+          <div style="flex:1;"><div class="ent-track"><div class="ent-fill" id="sac-bar" style="width:0%"></div></div></div>
+          <div style="font-family:var(--mono);font-size:.68rem;color:var(--text3);">ideal=50%</div>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:1px;height:60px;overflow:hidden;" id="sac-chart"></div>
+        <div style="font-family:var(--mono);font-size:.7rem;color:var(--text2);">Per-bit avalanche probability (should cluster near 0.5)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Power Trace / CPA ══════════════════════════════════════ -->
+<div class="view" id="view-power">
+  <div class="panel">
+    <div class="ph"><span class="pt">Hamming-Weight Power Trace + CPA</span><span class="badge bp2">Kocher et al. 1999</span></div>
+    <div class="pb flex-c">
+      <div class="flex-r" style="flex-wrap:wrap;">
+        <div class="fg grow"><label>Plaintext (hex, 16B)</label><input id="pt-pt" value="00112233445566778899aabbccddeeff"/></div>
+        <div class="fg grow"><label>Key (hex, 16B)</label><input id="pt-key" value="000102030405060708090a0b0c0d0e0f"/></div>
+        <div class="fg" style="width:120px;"><label>Noise σ</label><input id="pt-noise" type="number" value="0.1" step="0.05" min="0" max="2"/></div>
+        <button class="btn bp" onclick="runPower()" style="align-self:flex-end;">▶ Simulate Trace</button>
+      </div>
+    </div>
+  </div>
+  <div class="panel" id="power-panel" style="display:none;">
+    <div class="ph"><span class="pt">Power Consumption Trace</span></div>
+    <div class="pb flex-c">
+      <div style="position:relative;height:100px;background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+        <canvas id="power-canvas" style="width:100%;height:100%;"></canvas>
+      </div>
+      <div class="flex-r" style="gap:16px;flex-wrap:wrap;">
+        <div class="grow flex-c">
+          <label>CPA Key Guess (byte-by-byte)</label>
+          <div id="cpa-guess" style="display:flex;flex-wrap:wrap;gap:3px;font-family:var(--mono);font-size:.72rem;"></div>
+        </div>
+        <div class="grow flex-c">
+          <label>Hamming Weights Over Time</label>
+          <div style="display:flex;align-items:flex-end;gap:1px;height:55px;" id="hw-chart"></div>
+        </div>
+      </div>
+      <div style="font-family:var(--mono);font-size:.7rem;color:var(--text2);" id="cpa-note"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NIST Tests ══════════════════════════════════════════════ -->
+<div class="view" id="view-nist">
+  <div class="panel">
+    <div class="ph"><span class="pt">NIST SP 800-22 Statistical Tests</span><span class="badge bc">NIST 2010</span></div>
+    <div class="pb flex-c">
+      <div class="fg"><label>Bitstream (hex) — min 128 bits (32 hex chars)</label>
+        <textarea id="nist-bits" rows="3" placeholder="Paste hex data or use generator below…">b30b1aff8b6486988d9772525603f74e3bb16bec72a6d2ac05c95c3de7fc682ad87ef25cbfd419b00a6dbe03ea1b00708eef217788ba2198af09b876b6d89f8e400aa8784b86c15cecac1b6519ef223d893f5d0213018d08d4f443299edb5c33f84d4289074aa24033130554387ab0cc71758082d82542190c09c29926969caeccdfd58ba2ab145a41774057c533f71c1083876edd58dd0303bdd26352137126affc26e91670abb3d0dbdc54369ec490c09adbf0f439c6c9319e3c9d07c8f744ef85498e5abcf1e8b02e6f9b227536210aab731624f2bdc954eb7b290a4636de83c6df1e0a5a010149d7535c15e8def04a421d5076bb41572130b9c4aacbcc24</textarea>
+      </div>
+      <div class="flex-r" style="gap:8px;">
+        <button class="btn bp" onclick="runNIST()">▶ Run Test Suite</button>
+        <button class="btn bs" onclick="nistFromAES()">Use AES Output</button>
+        <button class="btn bs" onclick="nistRandom()">Use CSPRNG</button>
+      </div>
+    </div>
+  </div>
+  <div class="panel" id="nist-panel" style="display:none;">
+    <div class="ph">
+      <span class="pt">Test Results</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="badge" id="nist-badge"></span>
+        <span style="font-family:var(--mono);font-size:.72rem;color:var(--text2);" id="nist-score"></span>
+      </div>
+    </div>
+    <div class="pb flex-c">
+      <div id="nist-results" style="display:flex;flex-direction:column;gap:6px;"></div>
+      <div style="font-family:var(--mono);font-size:.7rem;color:var(--text3);border-top:1px solid var(--border);padding-top:8px;">
+        p-value threshold: 0.01 — sequences with p &lt; 0.01 fail (non-random at 1% significance level)
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</div></main></div>
+<div id="tc"></div>
+
+<script>
+const API='http://localhost:8000/api';
+let animSpd=350,totalScore=0,csSolved=0,csTotal=0,curCh=null;
+let aesData=null,aesRI=0,aesSS=0,aesTimer=null;
+let ccData=null,ccRI=0,ccTimer=null;
+let shaData=null,shaRI=0,shaTimer=null;
+let rsaData=null,rsaOI=0,rsaSI=0,rsaTimer=null;
+
+// ── Init ──────────────────────────────────────────────────────
+async function init(){
+  try{
+    const r=await fetch(`${API}/status`);const d=await r.json();
+    document.getElementById('sdot').classList.add('on');
+    document.getElementById('stxt').textContent='API online';
+    const eb=document.getElementById('eng-badge');
+    eb.textContent=d.native_engine?'ENGINE: C++':'ENGINE: PY';
+    if(d.native_engine) eb.className='badge bc';
+  }catch{document.getElementById('stxt').textContent='offline';}
+  buildSBox();
+  document.getElementById('spd').addEventListener('input',e=>animSpd=+e.target.value);
+}
+
+// ── Nav ───────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(x=>x.classList.remove('visible'));
+    b.classList.add('active');
+    const v=document.getElementById(`view-${b.dataset.v}`);
+    if(v){v.classList.add('visible');v.classList.add('fade-in');}
+  });
+});
+
+// ── Utils ─────────────────────────────────────────────────────
+function toast(msg,type='info',dur=3000){
+  const el=document.createElement('div');
+  el.className=`toast ${type}`;
+  el.innerHTML=`<span>${type==='success'?'✓':type==='error'?'✗':'ℹ'}</span><span>${msg}</span>`;
+  document.getElementById('tc').appendChild(el);
+  setTimeout(()=>el.remove(),dur);
+}
+async function api(ep,body){
+  const r=await fetch(`${API}${ep}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){const e=await r.json().catch(()=>({detail:'Error'}));throw new Error(e.detail||r.statusText);}
+  return r.json();
+}
+function hb(hex){const b=[];for(let i=0;i+1<hex.length;i+=2)b.push(parseInt(hex.slice(i,i+2),16));return b;}
+function bin8(b){return b.toString(2).padStart(8,'0');}
+function colorH(hex){const v=parseInt(hex,16);return `hsl(${(v/255)*200+180},65%,55%)`;}
+function rndHex(n){return Array.from({length:n},()=>Math.floor(Math.random()*256).toString(16).padStart(2,'0')).join('');}
+
+function randomizeAll(){
+  document.getElementById('aes-pt').value=rndHex(16);
+  const ks=parseInt(document.getElementById('g-ks').value)/8;
+  document.getElementById('aes-key').value=rndHex(ks);
+  document.getElementById('cc-pt').value=rndHex(35);
+  document.getElementById('cc-key').value=rndHex(32);
+  document.getElementById('cc-nonce').value=rndHex(12);
+  document.getElementById('sha-msg').value=rndHex(8);
+  document.getElementById('xp').value=rndHex(12);
+  document.getElementById('xk').value=rndHex(2);
+  toast('Inputs randomized','info');
+}
+function clearAll(){
+  document.querySelectorAll('input[type=text],input[type=number]').forEach(i=>{if(!i.readOnly)i.value='';});
+  toast('Cleared','info');
+}
+
+// ── S-Box ─────────────────────────────────────────────────────
+const SBOX=[0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76,0xca,0x82,0xc9,0x7d,0xfa,0x59,0x47,0xf0,0xad,0xd4,0xa2,0xaf,0x9c,0xa4,0x72,0xc0,0xb7,0xfd,0x93,0x26,0x36,0x3f,0xf7,0xcc,0x34,0xa5,0xe5,0xf1,0x71,0xd8,0x31,0x15,0x04,0xc7,0x23,0xc3,0x18,0x96,0x05,0x9a,0x07,0x12,0x80,0xe2,0xeb,0x27,0xb2,0x75,0x09,0x83,0x2c,0x1a,0x1b,0x6e,0x5a,0xa0,0x52,0x3b,0xd6,0xb3,0x29,0xe3,0x2f,0x84,0x53,0xd1,0x00,0xed,0x20,0xfc,0xb1,0x5b,0x6a,0xcb,0xbe,0x39,0x4a,0x4c,0x58,0xcf,0xd0,0xef,0xaa,0xfb,0x43,0x4d,0x33,0x85,0x45,0xf9,0x02,0x7f,0x50,0x3c,0x9f,0xa8,0x51,0xa3,0x40,0x8f,0x92,0x9d,0x38,0xf5,0xbc,0xb6,0xda,0x21,0x10,0xff,0xf3,0xd2,0xcd,0x0c,0x13,0xec,0x5f,0x97,0x44,0x17,0xc4,0xa7,0x7e,0x3d,0x64,0x5d,0x19,0x73,0x60,0x81,0x4f,0xdc,0x22,0x2a,0x90,0x88,0x46,0xee,0xb8,0x14,0xde,0x5e,0x0b,0xdb,0xe0,0x32,0x3a,0x0a,0x49,0x06,0x24,0x5c,0xc2,0xd3,0xac,0x62,0x91,0x95,0xe4,0x79,0xe7,0xc8,0x37,0x6d,0x8d,0xd5,0x4e,0xa9,0x6c,0x56,0xf4,0xea,0x65,0x7a,0xae,0x08,0xba,0x78,0x25,0x2e,0x1c,0xa6,0xb4,0xc6,0xe8,0xdd,0x74,0x1f,0x4b,0xbd,0x8b,0x8a,0x70,0x3e,0xb5,0x66,0x48,0x03,0xf6,0x0e,0x61,0x35,0x57,0xb9,0x86,0xc1,0x1d,0x9e,0xe1,0xf8,0x98,0x11,0x69,0xd9,0x8e,0x94,0x9b,0x1e,0x87,0xe9,0xce,0x55,0x28,0xdf,0x8c,0xa1,0x89,0x0d,0xbf,0xe6,0x42,0x68,0x41,0x99,0x2d,0x0f,0xb0,0x54,0xbb,0x16];
+function buildSBox(){
+  const g=document.getElementById('sbox-grid');
+  g.innerHTML=SBOX.map((v,i)=>`<div class="sbox-cell" data-i="${i}" data-v="${v.toString(16).padStart(2,'0')}" title="${i.toString(16).padStart(2,'0')}→${v.toString(16).padStart(2,'0')}">${v.toString(16).padStart(2,'0')}</div>`).join('');
+  g.querySelectorAll('.sbox-cell').forEach(c=>{
+    c.addEventListener('mouseenter',()=>{const tip=document.getElementById('sbox-tip');tip.style.display='inline-flex';tip.textContent=`0x${parseInt(c.dataset.i).toString(16).padStart(2,'0')} → 0x${c.dataset.v}`;});
+    c.addEventListener('mouseleave',()=>document.getElementById('sbox-tip').style.display='none');
+  });
+}
+function hlSBox(bytes){
+  document.querySelectorAll('.sbox-cell').forEach(c=>c.classList.remove('hl'));
+  bytes.forEach(b=>{const c=document.querySelector(`.sbox-cell[data-i="${b}"]`);if(c)c.classList.add('hl');});
+}
+
+// ── AES matrix render ─────────────────────────────────────────
+function mkMat(hexStr,cls=''){
+  const bytes=hb(hexStr);let html='';
+  for(let r=0;r<4;r++) for(let c=0;c<4;c++){
+    const b=bytes[c*4+r]; const h=b.toString(16).padStart(2,'0');
+    html+=`<div class="aes-cell ${cls}" style="color:${colorH(h)}">${h}</div>`;
+  }
+  return html;
+}
+function setMat(id,hexStr,cls=''){document.getElementById(id).innerHTML=mkMat(hexStr,cls);}
+function animMat(bid,aid,hb_,ha,cls=''){
+  setMat(bid,hb_);setMat(aid,ha,cls);
+  document.getElementById(aid).querySelectorAll('.aes-cell').forEach(c=>{
+    c.style.transform='scale(0.75)';c.style.opacity='0';
+    requestAnimationFrame(()=>{c.style.transition='all .32s cubic-bezier(.34,1.56,.64,1)';c.style.transform='';c.style.opacity='1';});
+  });
+}
+
+// ── AES ───────────────────────────────────────────────────────
+async function runAES(){
+  const pt=document.getElementById('aes-pt').value.trim().replace(/\s/g,'');
+  const key=document.getElementById('aes-key').value.trim().replace(/\s/g,'');
+  if(pt.length!==32){toast('Plaintext must be 32 hex chars','error');return;}
+  if(![32,48,64].includes(key.length)){toast('Key must be 32/48/64 hex chars','error');return;}
+  try{
+    aesData=await api('/aes/encrypt',{plaintext_hex:pt,key_hex:key,mode:'ECB'});
+    aesRI=0;aesSS=0;renderAESList();renderAESStep();renderAESKS();
+    document.getElementById('aes-ct').textContent=`Ciphertext: ${aesData.ciphertext_hex}`;
+    if(aesData.entropy) toast(`Entropy: ${aesData.entropy.entropy} bits/byte (${aesData.entropy.efficiency}% eff.)`,'info');
+    toast(`${aesData.algorithm} — ${aesData.rounds.length} rounds`,'success');
+  }catch(e){toast(e.message,'error');}
+}
+function renderAESList(){
+  if(!aesData)return;
+  document.getElementById('aes-rlist').innerHTML=aesData.rounds.map((r,i)=>
+    `<div class="round-item ${i===aesRI?'active':''}" onclick="selAESR(${i})">
+      <div class="rbadge" style="color:${i===0?'var(--warn)':i===aesData.rounds.length-1?'var(--accent3)':'var(--text3)'}">${r.round}</div>
+      <span>${r.operation}</span>
+    </div>`
+  ).join('');
+}
+function selAESR(i){aesRI=i;aesSS=0;renderAESList();renderAESStep();}
+const AES_SS=['state_before','after_sub_bytes','after_shift_rows','after_mix_columns','after_add_round_key'];
+const AES_SL=['State','SubBytes','ShiftRows','MixColumns','AddRoundKey'];
+const AES_SC=['','sub','shr','mix','ark'];
+const AES_OP={
+  state_before:r=>`<span class="kw">// Round ${r.round}: ${r.operation}</span>\n<span class="kw">Input:</span> <span class="val">${r.state_before}</span>`,
+  after_sub_bytes:_=>`<span class="kw">SubBytes:</span> S-Box substitution\nbyte' = S[byte]\n<span class="cmt">// Confusion — non-linear transformation in GF(2⁸)</span>`,
+  after_shift_rows:_=>`<span class="kw">ShiftRows:</span>\n  Row 0: no shift\n  Row 1: <<< 1\n  Row 2: <<< 2\n  Row 3: <<< 3\n<span class="cmt">// Diffusion across columns</span>`,
+  after_mix_columns:_=>`<span class="kw">MixColumns:</span> GF(2⁸) matrix multiply\n[2 3 1 1][s0c]\n[1 2 3 1][s1c] mod 0x11b\n[1 1 2 3][s2c]\n[3 1 1 2][s3c]`,
+  after_add_round_key:r=>`<span class="kw">AddRoundKey:</span> XOR state ⊕ subkey[${r.round}]\n<span class="val">${r.subkey}</span>`,
+};
+function renderAESStep(){
+  if(!aesData||aesRI>=aesData.rounds.length)return;
+  const round=aesData.rounds[aesRI];const ss=aesSS%AES_SS.length;
+  const hexBefore=round[AES_SS[Math.max(0,ss-1)]]||round.state_before;
+  const hexAfter=round[AES_SS[ss]]||round.state_before;
+  document.getElementById('aes-step-title').textContent=`Round ${round.round} — ${AES_SL[ss]}`;
+  document.getElementById('aes-al').textContent=`AFTER ${AES_SL[ss].toUpperCase()}`;
+  animMat('aes-mb','aes-ma',hexBefore,hexAfter,AES_SC[ss]);
+  document.getElementById('aes-op').innerHTML=AES_OP[AES_SS[ss]]?.(round)||'';
+  const skb=hb(round.subkey||'0'.repeat(32));
+  document.getElementById('aes-sk').innerHTML=skb.map(b=>`<div class="hx-cell hk">${b.toString(16).padStart(2,'0')}</div>`).join('');
+  if(ss===1) hlSBox(hb(round.state_before||'0'.repeat(32)));
+  else hlSBox([]);
+}
+function renderAESKS(){
+  if(!aesData)return;
+  document.getElementById('aes-ks').innerHTML=aesData.key_schedule.map((rk,i)=>
+    `<div style="display:flex;flex-direction:column;gap:2px;cursor:pointer;" onclick="selAESR(${i})" title="Round ${i} subkey">
+      <div style="font-family:var(--mono);font-size:.5rem;color:var(--text3);text-align:center;">R${i}</div>
+      <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:1px;">${hb(rk).map(b=>`<div style="padding:2px;border-radius:2px;font-family:var(--mono);font-size:.5rem;text-align:center;background:rgba(${i%2?'0,229,255':'124,58,237'},.07);color:var(--text3)">${b.toString(16).padStart(2,'0')}</div>`).join('')}</div>
+    </div>`
+  ).join('');
+}
+function aesP(){if(!aesData)return;if(aesSS>0)aesSS--;else if(aesRI>0){aesRI--;aesSS=AES_SS.length-1;}renderAESList();renderAESStep();}
+function aesN(){if(!aesData)return;aesSS++;if(aesSS>=AES_SS.length){aesSS=0;if(aesRI<aesData.rounds.length-1)aesRI++;}renderAESList();renderAESStep();}
+function aesPlay(){const btn=document.getElementById('aes-pb');if(aesTimer){clearInterval(aesTimer);aesTimer=null;btn.textContent='▶ Play';return;}btn.textContent='⏸ Pause';aesTimer=setInterval(()=>{aesN();if(aesRI===aesData.rounds.length-1&&aesSS===AES_SS.length-1){clearInterval(aesTimer);aesTimer=null;btn.textContent='▶ Play';}},animSpd);}
+
+async function runAESStream(){
+  if(!aesData)await runAES();
+  const pt=document.getElementById('aes-pt').value.trim();const key=document.getElementById('aes-key').value.trim();
+  const src=new EventSource(`${API}/aes/stream?plaintext_hex=${pt}&key_hex=${key}`);
+  toast('SSE stream started','info');
+  src.onmessage=e=>{const d=JSON.parse(e.data);if(d.type==='round'){const idx=aesData?.rounds.findIndex(r=>r.round===d.payload.round);if(idx>=0){aesRI=idx;renderAESList();renderAESStep();}}else if(d.type==='done'){toast(`Stream done. CT:${d.ciphertext}`,'success');src.close();}else if(d.error){toast(d.error,'error');src.close();}};
+}
+
+async function runAvalanche(){
+  const pt=document.getElementById('aes-pt').value.trim().replace(/\s/g,'');
+  const key=document.getElementById('aes-key').value.trim().replace(/\s/g,'');
+  try{
+    const r=await api('/analysis/avalanche',{plaintext_hex:pt,key_hex:key,flip_bit_position:0});
+    document.getElementById('av-panel').style.display='';
+    document.getElementById('av-pct').textContent=`${r.avalanche_percent}% bits flipped`;
+    document.getElementById('av-bits').textContent=`${r.bits_flipped}/128`;
+    document.getElementById('av-bar').style.width=`${r.avalanche_percent}%`;
+    const ob=hb(r.original_ct),mb=hb(r.modified_ct);
+    document.getElementById('av-orig').innerHTML=ob.map((b,i)=>`<div class="bybox ${b!==mb[i]?'diff':'same'}">${b.toString(16).padStart(2,'0')}</div>`).join('');
+    document.getElementById('av-mod').innerHTML=mb.map((b,i)=>`<div class="bybox ${b!==ob[i]?'diff':'same'}">${b.toString(16).padStart(2,'0')}</div>`).join('');
+    toast(`Avalanche: ${r.avalanche_percent}%`,r.avalanche_percent>40?'success':'info');
+  }catch(e){toast(e.message,'error');}
+}
+
+// ── ChaCha20 ─────────────────────────────────────────────────
+const CC_TYPES=['ct','ct','ct','ct','kw','kw','kw','kw','kw','kw','kw','kw','ctr','nc','nc','nc'];
+const CC_COL=[[0,4,8,12],[1,5,9,13],[2,6,10,14],[3,7,11,15]];
+const CC_DIA=[[0,5,10,15],[1,6,11,12],[2,7,8,13],[3,4,9,14]];
+async function runChaCha(){
+  const pt=document.getElementById('cc-pt').value.trim().replace(/\s/g,'');
+  const key=document.getElementById('cc-key').value.trim().replace(/\s/g,'');
+  const nc=document.getElementById('cc-nonce').value.trim().replace(/\s/g,'');
+  const ctr=parseInt(document.getElementById('cc-ctr').value)||0;
+  try{
+    ccData=await api('/chacha20/encrypt',{plaintext_hex:pt,key_hex:key,nonce_hex:nc,counter:ctr});
+    ccRI=0;renderCC(ccData.rounds[0]);
+    document.getElementById('cc-ks').textContent=ccData.keystream_hex;
+    document.getElementById('cc-ct').textContent=ccData.ciphertext_hex;
+    if(ccData.entropy){document.getElementById('cc-ev').textContent=`${ccData.entropy.entropy} bits`;document.getElementById('cc-eb').style.width=`${ccData.entropy.efficiency}%`;}
+    toast('ChaCha20 complete','success');
+  }catch(e){toast(e.message,'error');}
+}
+function renderCC(round){
+  if(!round)return;
+  const st=round.state_after||round.state_before;if(!st)return;
+  const act=round.type==='column'?CC_COL.flat():CC_DIA.flat();
+  document.getElementById('cc-mat').innerHTML=st.map((v,i)=>{
+    const is=act.includes(i);const tc=CC_TYPES[i]||'';
+    const ac=is?(round.type==='column'?'col-a':'diag-a'):'';
+    return `<div class="cc-cell ${tc} ${ac}"><div style="font-size:.48rem;color:var(--text3);">[${i}]</div><div style="font-size:.62rem;">${v}</div></div>`;
+  }).join('');
+  document.getElementById('cc-rl').textContent=`Round ${round.round_number}`;
+  document.getElementById('cc-tl').textContent=round.type.toUpperCase();
+  document.getElementById('cc-qr').textContent=round.type==='column'?'QR(0,4,8,12) QR(1,5,9,13) QR(2,6,10,14) QR(3,7,11,15)':'QR(0,5,10,15) QR(1,6,11,12) QR(2,7,8,13) QR(3,4,9,14)';
+}
+function ccP(){if(!ccData)return;ccRI=Math.max(0,ccRI-1);renderCC(ccData.rounds[ccRI]);}
+function ccN(){if(!ccData)return;ccRI=Math.min(ccData.rounds.length-1,ccRI+1);renderCC(ccData.rounds[ccRI]);}
+function ccPlay(){const btn=document.getElementById('cc-pb');if(ccTimer){clearInterval(ccTimer);ccTimer=null;btn.textContent='▶ Play';return;}btn.textContent='⏸ Pause';ccTimer=setInterval(()=>{if(!ccData||ccRI>=ccData.rounds.length-1){clearInterval(ccTimer);ccTimer=null;btn.textContent='▶ Play';return;}ccN();},animSpd);}
+
+// ── SHA-256 ───────────────────────────────────────────────────
+function sha_u2h(){const t=document.getElementById('sha-utf8').value;document.getElementById('sha-msg').value=Array.from(new TextEncoder().encode(t)).map(b=>b.toString(16).padStart(2,'0')).join('');}
+async function runSHA(){
+  const msg=document.getElementById('sha-msg').value.trim().replace(/\s/g,'');
+  try{
+    shaData=await api('/sha256/hash',{message_hex:msg});shaRI=0;
+    document.getElementById('sha-pad').textContent=shaData.padded_message_hex;
+    document.getElementById('sha-dig').textContent=shaData.digest_hex;
+    const labs=['H0','H1','H2','H3','H4','H5','H6','H7'];
+    document.getElementById('sha-hv').innerHTML=shaData.initial_hash.map((v,i)=>
+      `<div class="sha-var"><div class="sha-vl">${labs[i]}</div><div class="sha-vv" style="color:${i<4?'var(--accent)':'var(--accent2)'}">${v}</div></div>`
+    ).join('');
+    if(shaData.blocks&&shaData.blocks.length){renderSHAStep(0);renderSHAWS(shaData.blocks[0]);}
+    toast(`SHA-256: ${shaData.digest_hex.slice(0,16)}…`,'success');
+  }catch(e){toast(e.message,'error');}
+}
+function renderSHAStep(si){
+  if(!shaData||!shaData.blocks||!shaData.blocks[0])return;
+  const b=shaData.blocks[0];const s=b.steps[si];if(!s)return;
+  document.getElementById('sha-rb').textContent=`Round ${s.round}/63`;
+  document.getElementById('sha-pf').style.width=`${(s.round/63)*100}%`;
+  const labs=['a','b','c','d','e','f','g','h'];const vals=[s.a,s.b,s.c,s.d,s.e,s.f,s.g,s.h];
+  document.getElementById('sha-wv').innerHTML=labs.map((l,i)=>`<div class="sha-var"><div class="sha-vl">${l}</div><div class="sha-vv">${vals[i].toString(16).padStart(8,'0')}</div></div>`).join('');
+  document.getElementById('sha-sd').innerHTML=`<span class="kw">Round ${s.round}:</span>\nT1 = h+Σ₁(e)+Ch(e,f,g)+K[${s.round}]+W[${s.round}]\n   = ${s.h.toString(16).padStart(8,'0')}+…+${s.K.toString(16).padStart(8,'0')}+${s.W.toString(16).padStart(8,'0')}\n   = <span class="val">${s.T1.toString(16).padStart(8,'0')}</span>\nT2 = Σ₀(a)+Maj(a,b,c) = <span class="val">${s.T2.toString(16).padStart(8,'0')}</span>\na_new=<span class="val">${s.a_new.toString(16).padStart(8,'0')}</span> e_new=<span class="val">${s.e_new.toString(16).padStart(8,'0')}</span>`;
+  document.querySelectorAll('.w-c').forEach(c=>c.classList.remove('hl'));
+  const wc=document.querySelector(`.w-c[data-i="${s.round}"]`);if(wc)wc.classList.add('hl');
+}
+function renderSHAWS(block){
+  document.getElementById('sha-ws').innerHTML=block.message_schedule.map((w,i)=>
+    `<div class="w-c" data-i="${i}" style="padding:2px 4px;border-radius:3px;font-family:var(--mono);font-size:.56rem;background:var(--surface);border:1px solid var(--border);color:var(--text3);cursor:pointer;transition:all .18s;" title="W[${i}]">${w}</div>`
+  ).join('');
+}
+function shaP(){if(!shaData)return;shaRI=Math.max(0,shaRI-1);renderSHAStep(shaRI);}
+function shaN(){if(!shaData||!shaData.blocks||!shaData.blocks[0])return;shaRI=Math.min(shaData.blocks[0].steps.length-1,shaRI+1);renderSHAStep(shaRI);}
+function shaPlay(){const btn=document.getElementById('sha-pb');if(shaTimer){clearInterval(shaTimer);shaTimer=null;btn.textContent='▶ Play';return;}btn.textContent='⏸ Pause';shaTimer=setInterval(()=>{if(!shaData||!shaData.blocks||shaRI>=shaData.blocks[0].steps.length-1){clearInterval(shaTimer);shaTimer=null;btn.textContent='▶ Play';return;}shaN();},animSpd);}
+
+// ── RSA ───────────────────────────────────────────────────────
+async function runRSA(){
+  const p=+document.getElementById('rp').value,q=+document.getElementById('rq').value,e=+document.getElementById('re').value;
+  const msg=document.getElementById('rm').value.trim().replace(/\s/g,'');
+  try{
+    rsaData=await api('/rsa/encrypt',{p,q,e,msg_hex:msg});
+    document.getElementById('rn').textContent=rsaData.n;document.getElementById('rphi').textContent=rsaData.phi_n;
+    document.getElementById('re-v').textContent=rsaData.e;document.getElementById('rd').textContent=rsaData.d;
+    rsaOI=0;rsaSI=0;renderRSAOps();renderRSAStep();
+    toast(`RSA: n=${rsaData.n}, d=${rsaData.d}`,'success');
+  }catch(e){toast(e.message,'error');}
+}
+function renderRSAOps(){
+  if(!rsaData)return;
+  document.getElementById('rsa-ops').innerHTML=rsaData.operations.map((op,i)=>
+    `<div style="display:flex;align-items:center;gap:8px;padding:5px 9px;border-radius:5px;cursor:pointer;border:1px solid ${i===rsaOI?'var(--accent)':'transparent'};background:${i===rsaOI?'rgba(0,229,255,.06)':'none'};font-family:var(--mono);font-size:.7rem;color:var(--text2);" onclick="rsaSelOp(${i})">
+      <span style="color:var(--text3);">'${String.fromCharCode(op.plaintext_num)}'</span>
+      <span>0x${op.plaintext_num.toString(16).padStart(2,'0')} → CT:${op.ciphertext_num} → DEC:${op.decrypted_num}</span>
+    </div>`
+  ).join('');
+}
+function rsaSelOp(i){rsaOI=i;rsaSI=0;renderRSAOps();renderRSAStep();}
+function renderRSAStep(){
+  if(!rsaData||!rsaData.operations.length)return;
+  const op=rsaData.operations[rsaOI];const steps=op.encrypt_steps;
+  if(!steps||!steps.length){document.getElementById('rsa-sd').innerHTML=`<span class="kw">// Computed directly (trivial exp)</span>\nPT: <span class="val">${op.plaintext_num}</span> → CT: <span class="val">${op.ciphertext_num}</span> → DEC: <span class="val">${op.decrypted_num}</span> ✓`;return;}
+  const s=steps[Math.min(rsaSI,steps.length-1)];
+  document.getElementById('rsa-sd').innerHTML=`<span class="kw">Square-and-multiply ${rsaSI+1}/${steps.length}</span>\nResult before: <span class="val">${s.result_before}</span>\nBase²: <span class="val">${s.base_squared}</span> mod <span class="val">${s.modulus}</span>\nExp bit: <span class="val">${s.exponent_bit}</span> (multiply if 1)\nResult: <span class="val">${s.result_after}</span>\n\nPT=${op.plaintext_num} e=${rsaData.e} n=${rsaData.n}\nCT=m^e mod n=<span class="val">${op.ciphertext_num}</span>\nDEC=CT^d mod n=<span class="val">${op.decrypted_num}</span> ✓`;
+}
+function rsaP(){if(!rsaData)return;rsaSI=Math.max(0,rsaSI-1);renderRSAStep();}
+function rsaN(){if(!rsaData)return;const op=rsaData.operations[rsaOI];rsaSI=Math.min((op.encrypt_steps.length||1)-1,rsaSI+1);renderRSAStep();}
+function rsaPlay(){const btn=document.getElementById('rsa-pb');if(rsaTimer){clearInterval(rsaTimer);rsaTimer=null;btn.textContent='▶ Play';return;}btn.textContent='⏸ Pause';rsaTimer=setInterval(rsaN,animSpd);}
+
+// ── DH ────────────────────────────────────────────────────────
+async function runDH(){
+  const p=+document.getElementById('dhp').value,g=+document.getElementById('dhg').value;
+  const a=+document.getElementById('dha').value,b=+document.getElementById('dhb').value;
+  try{const r=await api('/dh/exchange',{p,g,alice_priv:a,bob_priv:b});renderDH(r,false);toast(`Shared: ${r.alice_shared}`,'success');}
+  catch(e){toast(e.message,'error');}
+}
+async function dhMITM(){
+  const p=+document.getElementById('dhp').value,g=+document.getElementById('dhg').value;
+  const a=+document.getElementById('dha').value,b=+document.getElementById('dhb').value;
+  try{const r=await api('/dh/exchange',{p,g,alice_priv:a,bob_priv:b});renderDH(r,true);toast('MITM: Eve intercepts both sides!','error',5000);}
+  catch(e){toast(e.message,'error');}
+}
+function renderDH(r,mitm){
+  document.getElementById('dh-ai').innerHTML=`priv=${r.alice_private}<br>pub=${r.alice_public}`;
+  document.getElementById('dh-bi').innerHTML=`priv=${r.bob_private}<br>pub=${r.bob_public}`;
+  const chan=document.getElementById('dh-chan');
+  if(mitm){
+    const ep=7,epub=Math.pow(r.generator,ep)%r.prime;
+    chan.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div class="dh-icon dh-eve" style="width:40px;height:40px;font-size:1rem;">😈</div><div style="font-family:var(--mono);font-size:.68rem;font-weight:700;color:var(--danger);">Eve (e=${ep},pub=${epub})</div><div style="font-family:var(--mono);font-size:.62rem;color:var(--danger);text-align:center;">⚠ Sends ${epub} to Alice<br>⚠ Sends ${epub} to Bob</div></div>`;
+  }else{
+    chan.innerHTML=`<div style="font-family:var(--mono);font-size:.65rem;color:var(--text2);text-align:center;display:flex;flex-direction:column;gap:6px;">
+      <div>A→B: g^a mod p = ${r.alice_public}</div>
+      <div style="height:1px;background:linear-gradient(90deg,var(--accent),var(--accent2));"></div>
+      <div>B→A: g^b mod p = ${r.bob_public}</div>
+      <div style="color:var(--text3);font-size:.6rem;">p=${r.prime}, g=${r.generator}</div>
+    </div>`;
+  }
+  document.getElementById('dh-shared').style.display='';
+  document.getElementById('dh-sv').textContent=`Alice: ${r.alice_public}^${r.bob_private} mod ${r.prime} = ${r.alice_shared}\nBob:   ${r.bob_public}^${r.alice_private} mod ${r.prime} = ${r.bob_shared}\nMatch: ${r.alice_shared===r.bob_shared?'✓ YES':'✗ NO'}`;
+  if(r.dlog_steps&&r.dlog_steps.length){
+    document.getElementById('dh-dlog').style.display='';
+    document.getElementById('dh-dg').innerHTML=r.dlog_steps.map(s=>s.x===999999?`<span style="color:var(--text3);">…trunc</span>`:`<div style="padding:2px 5px;border-radius:3px;font-size:.58rem;background:${s.val===r.alice_public?'rgba(0,229,255,.18)':'var(--surface)'};border:1px solid ${s.val===r.alice_public?'var(--accent)':'var(--border)'};color:${s.val===r.alice_public?'var(--accent)':'var(--text3)'};transition:all .2s;">x=${s.x}:${s.val}</div>`).join('');
+  }
+}
+
+// ── XOR ───────────────────────────────────────────────────────
+async function runXOR(){
+  const pt=document.getElementById('xp').value.trim().replace(/\s/g,'');
+  const key=document.getElementById('xk').value.trim().replace(/\s/g,'');
+  try{
+    const r=await api('/xor/encrypt',{plaintext_hex:pt,key_hex:key});renderXOR(r);
+    toast('XOR complete','success');
+  }catch(e){toast(e.message,'error');}
+}
+function renderXOR(r){
+  const vis=document.getElementById('xor-vis');
+  vis.innerHTML=(r.steps||[]).slice(0,16).map(s=>
+    `<div style="display:flex;flex-direction:column;gap:5px;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:6px;">
+      <div style="display:flex;gap:3px;align-items:center;"><span style="font-family:var(--mono);font-size:.62rem;color:var(--text3);width:65px;">Byte[${s.index}]</span><div class="bit-row">${s.pt_bits.split('').map(b=>`<div class="bit ${b==='1'?'one':'zero'}">${b}</div>`).join('')}</div><span style="font-family:var(--mono);font-size:.68rem;color:var(--text2);margin-left:3px;">=0x${s.pt_byte.toString(16).padStart(2,'0')}</span></div>
+      <div style="display:flex;gap:3px;align-items:center;"><span style="font-family:var(--mono);font-size:.62rem;color:var(--accent3);width:65px;">Key</span><div class="bit-row">${s.key_bits.split('').map(b=>`<div class="bit ${b==='1'?'one':'zero'}">${b}</div>`).join('')}</div><span style="font-family:var(--mono);font-size:.68rem;color:var(--text2);margin-left:3px;">=0x${s.key_byte.toString(16).padStart(2,'0')}</span></div>
+      <div style="height:1px;background:var(--border);"></div>
+      <div style="display:flex;gap:3px;align-items:center;"><span style="font-family:var(--mono);font-size:.62rem;color:var(--accent2);width:65px;">XOR ⊕</span><div class="bit-row">${s.ct_bits.split('').map(b=>`<div class="bit xr ${b==='1'?'one':'zero'}">${b}</div>`).join('')}</div><span style="font-family:var(--mono);font-size:.68rem;color:var(--accent2);margin-left:3px;">=0x${s.ct_byte.toString(16).padStart(2,'0')}</span></div>
+    </div>`
+  ).join('');
+  if((r.steps||[]).length>16) vis.innerHTML+=`<div style="font-family:var(--mono);font-size:.68rem;color:var(--text3);">…${r.steps.length-16} more bytes not shown</div>`;
+}
+function cribDrag(){
+  const ptHex=document.getElementById('xp').value.trim().replace(/\s/g,'');
+  const keyHex=document.getElementById('xk').value.trim().replace(/\s/g,'');
+  const crib=document.getElementById('xor-crib').value;
+  if(!crib){toast('Enter a crib','error');return;}
+  const pt=hb(ptHex),key=hb(keyHex);
+  const ct=pt.map((b,i)=>b^key[i%key.length]);
+  const cb=Array.from(new TextEncoder().encode(crib));
+  const results=[];
+  for(let pos=0;pos<=ct.length-cb.length;pos++){
+    const kg=cb.map((c,i)=>c^ct[pos+i]);
+    const ok=kg.every(b=>b>=0x20&&b<0x7f);
+    results.push({pos,hex:kg.map(b=>b.toString(16).padStart(2,'0')).join(''),printable:ok});
+  }
+  document.getElementById('xor-cr').innerHTML=`<div style="margin-bottom:5px;color:var(--text3)">Crib "${crib}":</div>`+
+    results.map(r=>`<div style="padding:3px 8px;border-radius:4px;margin:2px 0;${r.printable?'background:rgba(16,185,129,.07);border-left:2px solid var(--accent3);':''}">pos=${r.pos}: ${r.hex} ${r.printable?'<span style="color:var(--accent3)">✓ printable</span>':''}</div>`).join('');
+  toast('Crib drag complete','info');
+}
+
+// ── Vigenère ─────────────────────────────────────────────────
+async function runVig(){
+  const pt=document.getElementById('vp').value.trim().toUpperCase();
+  const key=document.getElementById('vk').value.trim().toUpperCase();
+  const dec=document.getElementById('vd').checked;
+  if(!key){toast('Key required','error');return;}
+  try{
+    const r=await api('/vigenere/encrypt',{plaintext:pt,key,encrypt:!dec});
+    document.getElementById('vig-res').textContent=r.ciphertext;
+    document.getElementById('vig-steps').innerHTML=(r.steps||[]).filter(s=>s.key_char&&s.key_char!=='\0').map((s,i)=>
+      `<div style="display:flex;align-items:center;gap:8px;padding:5px 9px;border-radius:5px;font-family:var(--mono);font-size:.68rem;color:var(--text2);">
+        <span style="color:var(--text3);">${i+1}</span>
+        <span>'${s.plaintext_char}' + shift ${s.shift} (key '${s.key_char}') = <span style="color:var(--accent)">'${s.output_char}'</span></span>
+      </div>`
+    ).join('');
+    renderVigTab(r.steps);
+    const freqR=await api('/analysis/frequency',{text:r.ciphertext});
+    renderFreq('vig-fc',freqR.frequencies,true);
+    const iocR=await api('/analysis/ioc',{ciphertext:r.ciphertext});
+    document.getElementById('vig-ioc').textContent=`IoC: ${iocR.ioc} (EN:0.0667 RND:0.0385) | Est. key len: ${iocR.estimated_key_length}`;
+    toast(`${dec?'Decrypted':'Encrypted'}: ${r.ciphertext}`,'success');
+  }catch(e){toast(e.message,'error');}
+}
+function renderVigTab(steps){
+  const ABC='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const usedKeys=[...new Set((steps||[]).filter(s=>s.key_char&&s.key_char!=='\0').map(s=>s.key_char.toUpperCase()))].slice(0,5);
+  if(!usedKeys.length)return;
+  let h=`<div class="vig-row"><div class="vc vh">K\\P</div>${ABC.split('').map(c=>`<div class="vc vh">${c}</div>`).join('')}</div>`;
+  usedKeys.forEach(kc=>{
+    const sh=kc.charCodeAt(0)-65;
+    h+=`<div class="vig-row"><div class="vc vk">${kc}</div>${ABC.split('').map(pc=>{
+      const out=String.fromCharCode((pc.charCodeAt(0)-65+sh)%26+65);
+      const hl=(steps||[]).some(s=>s.key_char&&s.key_char.toUpperCase()===kc&&s.plaintext_char.toUpperCase()===pc);
+      return `<div class="vc ${hl?'vhl':''}">${out}</div>`;
+    }).join('')}</div>`;
+  });
+  document.getElementById('vig-tab').innerHTML=h;
+}
+
+// ── Analysis ──────────────────────────────────────────────────
+async function runEnt(){
+  const d=document.getElementById('ent-d').value.trim().replace(/\s/g,'');
+  try{
+    const r=await api('/analysis/entropy',{data_hex:d});
+    const el=document.getElementById('ent-r');el.style.display='flex';
+    document.getElementById('ent-v').textContent=`${r.entropy} bits/byte (${r.efficiency}%)`;
+    document.getElementById('ent-b').style.width=`${r.efficiency}%`;
+    const dist=r.byte_distribution||{};const mx=Math.max(...Object.values(dist),1);
+    document.getElementById('ent-dist').innerHTML=Object.entries(dist).map(([b,c])=>`<div title="0x${(+b).toString(16).padStart(2,'0')}=${c}" style="width:5px;border-radius:1px 1px 0 0;background:rgba(0,229,255,.55);height:${Math.max(2,c/mx*28)}px;"></div>`).join('');
+    toast(`Entropy: ${r.entropy} bits/byte`,'info');
+  }catch(e){toast(e.message,'error');}
+}
+async function runIoC(){
+  const ct=document.getElementById('ioc-ct').value.trim();
+  try{
+    const r=await api('/analysis/ioc',{ciphertext:ct});
+    const el=document.getElementById('ioc-r');el.style.display='flex';
+    document.getElementById('ioc-s').innerHTML=`IoC: <b style="color:var(--accent)">${r.ioc}</b> | English: 0.0667 | Random: 0.0385 | Est. key len: <b style="color:var(--warn)">${r.estimated_key_length}</b>`;
+    const entries=Object.entries(r.key_length_iocs||{});
+    if(entries.length){const mx=Math.max(...entries.map(([,v])=>v));document.getElementById('ioc-b').innerHTML=entries.map(([kl,v])=>`<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;"><div style="width:100%;border-radius:2px 2px 0 0;background:${kl==r.estimated_key_length?'var(--accent)':'var(--accent2)'};height:${Math.max(2,v/mx*50)}px;transition:height .35s;"></div><div style="font-family:var(--mono);font-size:.5rem;color:var(--text3);">${kl}</div></div>`).join('');}
+    toast(`Est. key length: ${r.estimated_key_length}`,'info');
+  }catch(e){toast(e.message,'error');}
+}
+const EN_F={E:12.7,T:9.1,A:8.2,O:7.5,I:7.0,N:6.7,S:6.3,H:6.1,R:6.0,D:4.3,L:4.0,C:2.8,U:2.8,M:2.4,W:2.4,F:2.2,G:2.0,Y:2.0,P:1.9,B:1.5,V:1.0,K:0.8,J:0.2,X:0.2,Q:0.1,Z:0.1};
+function renderFreq(id,freqs,overlay){
+  const c=document.getElementById(id);const mx=Math.max(...Object.values(freqs),...Object.values(EN_F));
+  c.innerHTML='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(ch=>{
+    const f=freqs[ch]||0;const ef=EN_F[ch]||0;const h=Math.max(2,f/mx*68);const eh=Math.max(1,ef/mx*68);
+    return `<div class="freq-bw" title="${ch}: ${f}%"><div style="position:relative;width:100%;height:68px;display:flex;align-items:flex-end;gap:1px;"><div class="freq-b" style="height:${h}px;flex:1;"></div>${overlay?`<div class="freq-b en" style="height:${eh}px;flex:1;"></div>`:''}</div><div class="freq-bl">${ch}</div></div>`;
+  }).join('');
+}
+async function runFreq(){
+  const t=document.getElementById('freq-t').value;
+  try{
+    const r=await api('/analysis/frequency',{text:t});
+    renderFreq('ana-fc',r.frequencies,false);
+    document.getElementById('freq-chi').textContent=`χ²=${r.chi_squared} — ${r.is_likely_english?'✓ Likely English':'✗ Likely ciphertext'}`;
+    toast(`χ²=${r.chi_squared}`,r.is_likely_english?'success':'info');
+  }catch(e){toast(e.message,'error');}
+}
+
+// ── Challenges ────────────────────────────────────────────────
+async function genChallenge(){
+  const algo=document.getElementById('ch-algo').value;
+  const diff=document.getElementById('ch-diff').value;
+  try{
+    const r=await api('/challenge/generate',{algorithm:algo,difficulty:diff});
+    curCh=r;csTotal++;document.getElementById('ch-solved').textContent=`${csSolved}/${csTotal}`;
+    document.getElementById('ch-panel').style.display='';
+    document.getElementById('ch-title').textContent=`${r.algorithm} Challenge`;
+    const db=document.getElementById('ch-db');db.textContent=r.difficulty.toUpperCase();db.className=`badge diff-${r.difficulty}`;
+    document.getElementById('ch-pts').textContent=r.points;
+    document.getElementById('ch-q').textContent=r.question;
+    document.getElementById('ch-hint').style.display='none';
+    document.getElementById('ch-hint').textContent=r.hint;
+    document.getElementById('ch-gpt').textContent=r.plaintext_hex||'—';
+    document.getElementById('ch-gk').textContent=r.key_hex||'—';
+    document.getElementById('ch-gct').textContent=r.ciphertext_hex||'—';
+    document.getElementById('ch-ans').value='';
+    document.getElementById('ch-fb').style.display='none';
+    document.getElementById('ch-hint').classList.remove('rev');
+    toast(`Challenge: ${r.algorithm} ${r.difficulty}`,'info');
+  }catch(e){toast(e.message,'error');}
+}
+function showHint(){const h=document.getElementById('ch-hint');h.style.display=h.style.display==='none'?'':'none';h.classList.add('rev');}
+function submitAns(){
+  if(!curCh){toast('Generate a challenge first','error');return;}
+  const ans=document.getElementById('ch-ans').value.trim().toLowerCase();
+  const exp=curCh.expected_answer.toLowerCase();
+  const ok=ans===exp;
+  const fb=document.getElementById('ch-fb');fb.style.display='';
+  if(ok){
+    fb.style.color='var(--accent3)';fb.textContent=`✓ Correct! +${curCh.points} points`;
+    totalScore+=curCh.points;csSolved++;
+    document.getElementById('tot-score').textContent=totalScore;
+    document.getElementById('ch-score').textContent=totalScore;
+    document.getElementById('ch-solved').textContent=`${csSolved}/${csTotal}`;
+    addHist(curCh,true);toast(`+${curCh.points} pts!`,'success');
+  }else{
+    fb.style.color='var(--danger)';fb.textContent=`✗ Wrong. Expected: ${exp.slice(0,32)}${exp.length>32?'…':''}`;
+    addHist(curCh,false);toast('Wrong answer','error');
+  }
+}
+function addHist(ch,ok){
+  const h=document.getElementById('ch-hist');const e=document.createElement('div');
+  e.style.cssText=`font-family:var(--mono);font-size:.62rem;display:flex;justify-content:space-between;padding:3px 6px;border-radius:4px;${ok?'background:rgba(16,185,129,.07);color:var(--accent3);':'background:rgba(239,68,68,.06);color:var(--danger);'}`;
+  e.textContent=`${ch.algorithm} ${ch.difficulty} ${ok?'+'+ch.points:'✗'}`;
+  h.prepend(e);
+}
+
+window.addEventListener('DOMContentLoaded',init);
+
+// ════════════════════════════════════════════════════════════════════════════
+// RESEARCH FEATURES JS
+// ════════════════════════════════════════════════════════════════════════════
+
+// ── SHA-3 ─────────────────────────────────────────────────────────────────────
+let s3Data=null, s3RI=0, s3Timer=null;
+function s3u2h(){ const t=document.getElementById('s3-utf8').value; document.getElementById('s3-msg').value=Array.from(new TextEncoder().encode(t)).map(b=>b.toString(16).padStart(2,'0')).join(''); }
+async function runSHA3(){
+  const msg=document.getElementById('s3-msg').value.trim().replace(/\s/g,'');
+  const variant=document.getElementById('s3-var').value;
+  try{
+    s3Data=await api('/sha3/hash',{message_hex:msg,variant});
+    s3RI=0;
+    document.getElementById('s3-dig').textContent=s3Data.digest_hex;
+    document.getElementById('s3-params').innerHTML=
+      `<div style="padding:6px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;"><div style="font-family:var(--mono);font-size:.6rem;color:var(--text3);">Rate</div><div style="font-family:var(--mono);color:var(--accent);">${s3Data.rate_bits} bits</div></div>
+       <div style="padding:6px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;"><div style="font-family:var(--mono);font-size:.6rem;color:var(--text3);">Capacity</div><div style="font-family:var(--mono);color:var(--accent2);">${s3Data.capacity_bits} bits</div></div>
+       <div style="padding:6px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;"><div style="font-family:var(--mono);font-size:.6rem;color:var(--text3);">Rounds</div><div style="font-family:var(--mono);color:var(--accent3);">24</div></div>
+       <div style="padding:6px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;"><div style="font-family:var(--mono);font-size:.6rem;color:var(--text3);">State</div><div style="font-family:var(--mono);color:var(--warn);">1600 bits</div></div>`;
+    if(s3Data.rounds&&s3Data.rounds.length) renderS3Round(0);
+    // Sponge states
+    const sp=document.getElementById('s3-sponge');
+    sp.innerHTML=(s3Data.absorption_states||[]).map((s,i)=>
+      `<div style="display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:.65rem;color:var(--text2);padding:3px 8px;background:var(--surface);border-radius:4px;border-left:2px solid var(--accent);">
+        <span style="color:var(--accent);">ABS[${i}]</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.slice(0,64)}…</span>
+       </div>`
+    ).join('')+(s3Data.squeezing_states||[]).map((s,i)=>
+      `<div style="display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:.65rem;color:var(--text2);padding:3px 8px;background:var(--surface);border-radius:4px;border-left:2px solid var(--accent2);">
+        <span style="color:var(--accent2);">SQZ[${i}]</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.slice(0,64)}…</span>
+       </div>`
+    ).join('');
+    toast(`${s3Data.algorithm}: ${s3Data.digest_hex.slice(0,16)}…`,'success');
+  }catch(e){toast(e.message,'error');}
+}
+function renderS3Round(ri){
+  if(!s3Data||!s3Data.rounds||!s3Data.rounds[ri]) return;
+  const r=s3Data.rounds[ri];
+  document.getElementById('s3-rb').textContent=`Round ${r.round_number}/23`;
+  const st=document.getElementById('s3-state');
+  const state=r.state_after||r.state_before||[];
+  st.innerHTML=state.map((v,i)=>{
+    const hw=v.split('').filter(c=>parseInt(c,16)).length; // rough hw
+    return `<div style="padding:4px;border-radius:4px;font-family:var(--mono);font-size:.58rem;text-align:center;background:var(--surface);border:1px solid var(--border2);color:hsl(${(i/25)*200+180},60%,55%);" title="Lane[${i}]: ${v}">
+      <div style="font-size:.5rem;color:var(--text3);">[${Math.floor(i/5)},${i%5}]</div>
+      <div>${v.slice(0,8)}</div><div style="color:var(--text3);">${v.slice(8)}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('s3-theta').textContent=r.theta_xors?`θ XORs: ${r.theta_xors.slice(0,64)}…`:'(theta data from first block only)';
+  document.getElementById('s3-iota').textContent=r.iota_constant?`ι RC[${r.round_number}] = 0x${r.iota_constant}`:'';
+}
+function s3P(){if(!s3Data||!s3Data.rounds)return;s3RI=Math.max(0,s3RI-1);renderS3Round(s3RI);}
+function s3N(){if(!s3Data||!s3Data.rounds)return;s3RI=Math.min(s3Data.rounds.length-1,s3RI+1);renderS3Round(s3RI);}
+function s3Play(){const btn=document.getElementById('s3-pb');if(s3Timer){clearInterval(s3Timer);s3Timer=null;btn.textContent='▶ Play';return;}btn.textContent='⏸ Pause';s3Timer=setInterval(()=>{if(!s3Data||s3RI>=s3Data.rounds.length-1){clearInterval(s3Timer);s3Timer=null;btn.textContent='▶ Play';return;}s3N();},animSpd);}
+
+// ── HMAC / PBKDF2 ──────────────────────────────────────────────────────────────
+async function runHMAC(){
+  const key=document.getElementById('hm-key').value.trim().replace(/\s/g,'');
+  const msg=document.getElementById('hm-msg').value.trim().replace(/\s/g,'');
+  try{
+    const r=await api('/hmac/compute',{key_hex:key,msg_hex:msg});
+    const vis=document.getElementById('hmac-vis');
+    vis.innerHTML=`
+      <div class="flex-c" style="gap:5px;">
+        <div style="font-family:var(--mono);font-size:.68rem;"><span style="color:var(--text3);">Key ⊕ ipad:</span> <span style="color:var(--accent3);">${(r.ipad_key_hex||'').slice(0,32)}…</span></div>
+        <div style="font-family:var(--mono);font-size:.68rem;"><span style="color:var(--text3);">Key ⊕ opad:</span> <span style="color:var(--accent2);">${(r.opad_key_hex||'').slice(0,32)}…</span></div>
+        <div style="font-family:var(--mono);font-size:.68rem;"><span style="color:var(--text3);">Inner H =</span> <span style="color:var(--accent);">${r.inner_hash_hex||''}</span></div>
+        <div style="font-family:var(--mono);font-size:.68rem;"><span style="color:var(--text3);">Outer H =</span> <span style="color:var(--warn);">${r.outer_hash_hex||''}</span></div>
+        <div class="fg"><label>HMAC-SHA256</label><div class="code" style="color:var(--accent);font-weight:700;">${r.mac_hex||''}</div></div>
+      </div>`;
+    toast(`HMAC: ${(r.mac_hex||'').slice(0,16)}…`,'success');
+  }catch(e){toast(e.message,'error');}
+}
+async function runPBKDF2(){
+  const pw=document.getElementById('pk-pw').value.trim().replace(/\s/g,'');
+  const salt=document.getElementById('pk-salt').value.trim().replace(/\s/g,'');
+  const iter=parseInt(document.getElementById('pk-iter').value)||10000;
+  const dklen=parseInt(document.getElementById('pk-dklen').value)||32;
+  try{
+    const r=await api('/pbkdf2/derive',{password_hex:pw,salt_hex:salt,iterations:iter,dklen});
+    const vis=document.getElementById('pbkdf2-vis');
+    const crackSec=(r.estimated_crack_time_ms||0)/1000;
+    const crackStr=crackSec<1?'<1 sec':crackSec<3600?`${Math.round(crackSec)} sec`:crackSec<86400*365?`${Math.round(crackSec/3600)} hrs`:`${Math.round(crackSec/86400/365)} yrs`;
+    vis.innerHTML=`
+      <div class="flex-c" style="gap:5px;">
+        <div class="code" style="color:var(--accent3);font-weight:700;">${r.derived_key_hex||''}</div>
+        <div class="flex-r" style="gap:10px;flex-wrap:wrap;font-family:var(--mono);font-size:.7rem;color:var(--text2);">
+          <span>Iterations: <b style="color:var(--accent);">${r.iterations||iter}</b></span>
+          <span>DKLen: <b style="color:var(--accent);">${r.dklen||dklen} bytes</b></span>
+          <span>Password entropy: <b style="color:var(--warn);">${(r.entropy_bits||0).toFixed(1)} bits</b></span>
+          <span>Crack time @1B/s: <b style="color:${crackSec<60?'var(--danger)':'var(--accent3)'};">${crackStr}</b></span>
+        </div>
+        <div style="font-family:var(--mono);font-size:.68rem;color:var(--text3);">First ${(r.rounds||[]).length} of ${iter} iterations shown:</div>
+        <div style="display:flex;flex-direction:column;gap:3px;max-height:120px;overflow-y:auto;">
+          ${(r.rounds||[]).map(round=>`<div style="display:flex;gap:8px;font-family:var(--mono);font-size:.63rem;color:var(--text2);padding:2px 6px;background:var(--surface);border-radius:3px;">
+            <span style="color:var(--text3);width:40px;">U[${round.iteration}]</span>
+            <span>${(round.u_hex||'').slice(0,32)}…</span>
+            <span style="color:var(--accent3);">T=${(round.t_hex||'').slice(0,16)}…</span>
+          </div>`).join('')}
+        </div>
+      </div>`;
+    toast(`PBKDF2 derived key: ${(r.derived_key_hex||'').slice(0,16)}…`,'success');
+  }catch(e){toast(e.message,'error');}
+}
+
+// ── Differential Cryptanalysis ─────────────────────────────────────────────────
+async function runDiff(){
+  const p1=document.getElementById('dc-p1').value.trim().replace(/\s/g,'');
+  const p2=document.getElementById('dc-p2').value.trim().replace(/\s/g,'');
+  const key=document.getElementById('dc-key').value.trim().replace(/\s/g,'');
+  const rounds=parseInt(document.getElementById('dc-rounds').value)||4;
+  if(p1.length!==32||p2.length!==32){toast('Both plaintexts must be 32 hex chars','error');return;}
+  try{
+    const r=await api('/analysis/differential',{pt1_hex:p1,pt2_hex:p2,key_hex:key,num_rounds:rounds});
+    document.getElementById('diff-result').style.display='';
+    const vis=document.getElementById('diff-vis');
+    const prob=r.probability_log2;
+    vis.innerHTML=`
+      <div class="flex-r" style="gap:12px;flex-wrap:wrap;">
+        <div class="flex-c" style="gap:4px;">
+          <label>Input Differential (Δ P)</label>
+          <div class="code" style="color:var(--accent);">${r.input_diff_hex||''}</div>
+        </div>
+        <div style="display:flex;align-items:center;font-size:1.2rem;color:var(--text3);">→</div>
+        <div class="flex-c" style="gap:4px;">
+          <label>Output Differential (Δ C)</label>
+          <div class="code" style="color:var(--accent2);">${r.output_diff_hex||''}</div>
+        </div>
+      </div>
+      <div class="code" style="font-size:.72rem;">Differential probability: 2^<span style="color:var(--warn);">${prob.toFixed(1)}</span> ≈ ${Math.pow(2,prob).toExponential(2)}\nInterpretation: ${prob<-128?'Below birthday bound — characteristic unusable':'Characteristic exists; stronger than random'}</div>
+      <div>
+        <label>Per-Round Active S-Boxes & Differentials</label>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">
+          ${(r.round_diffs||[]).map((d,i)=>`
+            <div style="display:flex;gap:10px;align-items:center;font-family:var(--mono);font-size:.68rem;">
+              <span style="color:var(--text3);width:55px;">Round ${i+1}</span>
+              <span style="background:rgba(124,58,237,.15);padding:2px 6px;border-radius:3px;color:#c4b5fd;">${d}</span>
+              <span style="color:var(--warn);">${r.active_sboxes&&r.active_sboxes[i]!==undefined?r.active_sboxes[i]+' active S-boxes':''}</span>
+              <div style="flex:1;height:4px;background:var(--border);border-radius:2px;">
+                <div style="height:100%;background:var(--accent2);border-radius:2px;width:${Math.min(100,(r.active_sboxes&&r.active_sboxes[i]||0)/16*100)}%;"></div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+    toast(`Differential probability: 2^${prob.toFixed(1)}`,'info');
+  }catch(e){toast(e.message,'error');}
+}
+
+async function runLinear(){
+  const im=document.getElementById('la-im').value.trim().replace(/\s/g,'');
+  const om=document.getElementById('la-om').value.trim().replace(/\s/g,'');
+  const rounds=parseInt(document.getElementById('la-r').value)||3;
+  try{
+    const r=await api('/analysis/linear',{input_mask_hex:im,output_mask_hex:om,num_rounds:rounds});
+    document.getElementById('lin-result').style.display='';
+    const vis=document.getElementById('lin-vis');
+    vis.innerHTML=`
+      <div class="code" style="font-size:.72rem;">
+S-Box bias ε = <span style="color:var(--accent);">${r.bias.toFixed(6)}</span>  |  Advantage = <span style="color:var(--warn);">${r.advantage.toFixed(6)}</span>
+Piling-up lemma: ε_total = 2^(n-1) × ∏εᵢ over ${rounds} rounds
+Final bias (${rounds}r): <span style="color:var(--accent2);">${(r.round_biases&&r.round_biases[r.round_biases.length-1]||0).toFixed(8)}</span>
+Data complexity: ~<span style="color:var(--danger);">${r.advantage>0?(1/Math.pow(r.advantage,2)).toExponential(2):'∞'}</span> known-plaintext pairs
+      </div>`;
+    const chart=document.getElementById('lin-chart');
+    const biases=r.round_biases||[];
+    const maxB=Math.max(...biases.map(Math.abs),0.01);
+    chart.innerHTML=biases.map((b,i)=>`
+      <div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;">
+        <div style="width:100%;border-radius:2px 2px 0 0;background:${Math.abs(b)>0.01?'var(--accent2)':'var(--border)'};height:${Math.max(2,Math.abs(b)/maxB*74)}px;transition:height .4s;"></div>
+        <div style="font-family:var(--mono);font-size:.5rem;color:var(--text3);">r${i+1}</div>
+      </div>`).join('');
+    toast(`Linear bias over ${rounds} rounds: ${(r.round_biases&&r.round_biases.slice(-1)[0]||0).toExponential(3)}`,'info');
+  }catch(e){toast(e.message,'error');}
+}
+
+async function runSAC(){
+  const key=document.getElementById('sac-key').value.trim().replace(/\s/g,'');
+  const n=parseInt(document.getElementById('sac-n').value)||256;
+  if(key.length<32){toast('Key must be at least 32 hex chars','error');return;}
+  try{
+    const r=await api('/analysis/sac',{key_hex:key,num_samples:n});
+    document.getElementById('sac-result').style.display='';
+    const pct=(r.sac_score*100).toFixed(2);
+    document.getElementById('sac-score').textContent=`SAC Score: ${pct}%`;
+    document.getElementById('sac-score').style.color=Math.abs(r.sac_score-0.5)<0.05?'var(--accent3)':'var(--warn)';
+    document.getElementById('sac-bar').style.width=`${pct}%`;
+    const chart=document.getElementById('sac-chart');
+    const perBit=r.per_bit_avalanche||[];
+    chart.innerHTML=perBit.map((v,i)=>`
+      <div style="flex:1;border-radius:1px 1px 0 0;background:${Math.abs(v-0.5)<0.05?'var(--accent3)':Math.abs(v-0.5)<0.1?'var(--warn)':'var(--danger)'};height:${Math.max(1,v*56)}px;transition:height .3s;" title="Bit ${i}: ${(v*100).toFixed(1)}%"></div>
+    `).join('');
+    toast(`SAC: ${pct}% (${Math.abs(r.sac_score-0.5)<0.05?'✓ Meets SAC':'✗ Fails SAC'})`,(r.sac_score>0.45&&r.sac_score<0.55)?'success':'info');
+  }catch(e){toast(e.message,'error');}
+}
+
+// ── Power Trace / CPA ─────────────────────────────────────────────────────────
+async function runPower(){
+  const pt=document.getElementById('pt-pt').value.trim().replace(/\s/g,'');
+  const key=document.getElementById('pt-key').value.trim().replace(/\s/g,'');
+  const sigma=parseFloat(document.getElementById('pt-noise').value)||0.1;
+  if(pt.length!==32||key.length!==32){toast('PT and Key must be 32 hex chars (16 bytes)','error');return;}
+  try{
+    const r=await api('/analysis/power_trace',{pt_hex:pt,key_hex:key,noise_sigma:sigma});
+    document.getElementById('power-panel').style.display='';
+    // Draw power trace on canvas
+    const canvas=document.getElementById('power-canvas');
+    const ctx=canvas.getContext('2d');
+    canvas.width=canvas.offsetWidth||800; canvas.height=100;
+    const samples=r.power_samples||[];
+    const maxP=Math.max(...samples)+1; const minP=Math.min(...samples)-1;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle='rgba(0,229,255,0.8)'; ctx.lineWidth=1;
+    ctx.beginPath();
+    samples.forEach((v,i)=>{
+      const x=i/samples.length*canvas.width;
+      const y=(1-(v-minP)/(maxP-minP))*canvas.height;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    // Draw operation boundaries
+    const labels=r.operation_labels||[];
+    let prevLabel=-1;
+    ctx.strokeStyle='rgba(124,58,237,0.3)'; ctx.lineWidth=0.5;
+    labels.forEach((lbl,i)=>{
+      if(lbl!==prevLabel){
+        const x=i/samples.length*canvas.width;
+        ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke();
+        prevLabel=lbl;
+      }
+    });
+    // CPA key guesses
+    const guesses=r.cpa_key_guess||[];
+    const actualKey=hb(key);
+    document.getElementById('cpa-guess').innerHTML=guesses.map((g,i)=>{
+      const correct=g===actualKey[i];
+      return `<div style="padding:3px 6px;border-radius:3px;font-family:var(--mono);font-size:.65rem;background:${correct?'rgba(16,185,129,.15)':'rgba(239,68,68,.1)'};border:1px solid ${correct?'var(--accent3)':'var(--danger)'};color:${correct?'var(--accent3)':'var(--danger)'};" title="Byte ${i}">
+        K[${i}]=0x${g.toString(16).padStart(2,'0')} ${correct?'✓':'✗'}
+      </div>`;
+    }).join('');
+    // HW bar chart
+    const hws=r.hamming_weights||[];
+    const hwChart=document.getElementById('hw-chart');
+    hwChart.innerHTML=hws.slice(0,64).map(hw=>`<div style="flex:1;border-radius:1px 1px 0 0;background:rgba(0,229,255,0.6);height:${hw/8*52}px;min-height:1px;"></div>`).join('');
+    const correct=guesses.filter((g,i)=>g===actualKey[i]).length;
+    document.getElementById('cpa-note').textContent=`CPA recovered ${correct}/16 key bytes correctly. Power model: Hamming Weight of AES SubBytes output. Noise σ=${sigma}. In practice requires 1000+ traces.`;
+    toast(`CPA: ${correct}/16 bytes recovered`,(correct>=12)?'success':'info');
+  }catch(e){toast(e.message,'error');}
+}
+
+// ── NIST Tests ────────────────────────────────────────────────────────────────
+async function runNIST(){
+  const rawBits=document.getElementById('nist-bits').value.trim().replace(/\s/g,'');
+  const bits=rawBits.replace(/[^0-9a-fA-F]/g,''); // strip any non-hex chars
+  if(bits.length<32){toast('Need at least 32 hex chars (128 bits)','error');return;}
+  try{
+    const r=await api('/analysis/nist',{bitstream_hex:bits,num_bits:0});
+    document.getElementById('nist-panel').style.display='';
+    const badge=document.getElementById('nist-badge');
+    badge.textContent=r.is_random?'RANDOM (PASS)':'NON-RANDOM (FAIL)';
+    badge.className=`badge ${r.is_random?'bg':''}`;
+    badge.style.color=r.is_random?'var(--accent3)':'var(--danger)';
+    document.getElementById('nist-score').textContent=`${r.passed_count}/${r.total_count} tests passed (${(r.overall_score*100).toFixed(0)}%)`;
+    document.getElementById('nist-results').innerHTML=(r.tests||[]).map(t=>`
+      <div style="display:flex;gap:10px;align-items:center;padding:8px 12px;border-radius:6px;background:${t.passed?'rgba(16,185,129,.06)':'rgba(239,68,68,.06)'};border:1px solid ${t.passed?'rgba(16,185,129,.2)':'rgba(239,68,68,.2)'};">
+        <div style="font-size:.85rem;">${t.passed?'✓':'✗'}</div>
+        <div class="flex-c" style="gap:2px;flex:1;">
+          <div style="font-family:var(--mono);font-size:.72rem;font-weight:700;color:${t.passed?'var(--accent3)':'var(--danger)'};">${t.test_name}</div>
+          <div style="font-family:var(--mono);font-size:.65rem;color:var(--text3);">${t.interpretation}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:var(--mono);font-size:.7rem;color:var(--text2);">p = ${t.p_value.toFixed(6)}</div>
+          <div style="font-family:var(--mono);font-size:.6rem;color:var(--text3);">${t.p_value>=0.01?'p≥0.01 pass':'p<0.01 fail'}</div>
+        </div>
+        <div style="width:60px;">
+          <div style="height:5px;background:var(--border);border-radius:2px;">
+            <div style="height:100%;background:${t.passed?'var(--accent3)':'var(--danger)'};border-radius:2px;width:${Math.min(100,t.p_value*100)}%;"></div>
+          </div>
+        </div>
+      </div>`).join('');
+    toast(`NIST: ${r.passed_count}/${r.total_count} passed — ${r.is_random?'Appears random':'Non-random!'}`,(r.is_random)?'success':'info');
+  }catch(e){toast(e.message,'error');}
+}
+
+async function nistFromAES(){
+  const pt=document.getElementById('aes-pt').value.trim().replace(/\s/g,'')||'00112233445566778899aabbccddeeff';
+  const key=document.getElementById('aes-key').value.trim().replace(/\s/g,'')||'000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f';
+  try{
+    const r=await api('/aes/encrypt',{plaintext_hex:pt,key_hex:key.slice(0,64),mode:'ECB'});
+    // Repeat ciphertext to get enough bits
+    let bits=(r.ciphertext_hex||'').repeat(16);
+    document.getElementById('nist-bits').value=bits;
+    toast('Loaded AES ciphertext as bitstream','info');
+  }catch(e){toast(e.message,'error');}
+}
+
+function nistRandom(){
+  const bytes=Array.from({length:256},()=>Math.floor(Math.random()*256).toString(16).padStart(2,'0')).join('');
+  document.getElementById('nist-bits').value=bytes;
+  toast('Loaded CSPRNG bitstream','info');
+}
+
+// ── Enhanced AES Research panel updates ──────────────────────────────────────
+// Augment existing runAES to show research metrics
+const _origRunAES = window.runAES || (()=>{});
+// Patch runAES to also update research metrics after result
+const _aesResearchUpdate = (data) => {
+  if(!data) return;
+  // Update sidebar score label with SAC
+  if(data.strict_avalanche !== undefined){
+    const pct = (data.strict_avalanche*100).toFixed(1);
+    // Could add a small badge to AES result — currently shown in ciphertext area
+    const ct = document.getElementById('aes-ct');
+    if(ct){
+      ct.innerHTML = `Ciphertext: ${data.ciphertext_hex}\n\nSAC: ${pct}% | Active S-Boxes: ${data.num_active_sboxes} | HW Trace: ${(data.hw_trace||[]).slice(0,8).join(',')}…`;
+    }
+  }
+};
+
+// Override runAES to call research update
+(function(){
+  const orig = window.runAES;
+  if(typeof orig === 'function'){
+    window.runAES = async function(){
+      await orig.call(this);
+      _aesResearchUpdate(window.aesData);
+    };
+  }
+})();
+
+</script>
+</body>
+</html>

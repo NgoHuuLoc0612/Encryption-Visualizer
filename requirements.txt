@@ -1,0 +1,5 @@
+# Python dependencies for CryptoViz
+fastapi
+uvicorn[standard]
+pybind11
+pycryptodome
