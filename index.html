@@ -1605,15 +1605,23 @@ async function runNIST(){
 }
 
 async function nistFromAES(){
-  const pt=document.getElementById('aes-pt').value.trim().replace(/\s/g,'')||'00112233445566778899aabbccddeeff';
-  const key=document.getElementById('aes-key').value.trim().replace(/\s/g,'')||'000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f';
+  // Generate proper AES-CTR keystream for NIST tests.
+  // AES-CTR: encrypt 128 blocks of zeros with incrementing IV.
+  // PT=0x00...00 → CT = keystream block. Each block uses distinct counter → no ECB pattern.
+  const key=(document.getElementById('aes-key').value.trim().replace(/\s/g,'')||
+    '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f').slice(0,64).padEnd(64,'0');
+  // Random IV so successive calls produce different streams
+  const iv=Array.from({length:16},()=>Math.floor(Math.random()*256).toString(16).padStart(2,'0')).join('');
+  // Plaintext: 2048 zero bytes = 128 blocks
+  const pt='00'.repeat(128);
+  toast('Generating AES-CTR keystream…','info');
   try{
-    const r=await api('/aes/encrypt',{plaintext_hex:pt,key_hex:key.slice(0,64),mode:'ECB'});
-    // Repeat ciphertext to get enough bits
-    let bits=(r.ciphertext_hex||'').repeat(16);
+    const r=await api('/aes/encrypt',{plaintext_hex:pt,key_hex:key,mode:'CTR',iv_hex:iv});
+    const bits=(r.ciphertext_hex||'');
+    if(bits.length<32){ toast('AES output too short','error'); return; }
     document.getElementById('nist-bits').value=bits;
-    toast('Loaded AES ciphertext as bitstream','info');
-  }catch(e){toast(e.message,'error');}
+    toast(`AES-CTR keystream: ${bits.length} hex chars = ${bits.length*4} bits`,'success');
+  }catch(e){ toast(e.message,'error'); }
 }
 
 function nistRandom(){
